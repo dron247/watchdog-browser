@@ -7,22 +7,27 @@
         xmlns:awe="http://schemas.awesomium.com/winfx" x:Class="WatchdogBrowser.MainWindow"
         mc:Ignorable="d"
         Title="MainWindow" MinHeight="350" MinWidth="525" Height="350" Width="525"
-        WindowState="Maximized">
+        WindowState="Maximized" Icon="web_hi_res_512.ico"
+        DataContext="{Binding Main, Source={StaticResource Locator}}">
+
 
     <DockPanel LastChildFill="True" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-        <Grid Height="32" VerticalAlignment="Top" HorizontalAlignment="Stretch" Background="Gray" DockPanel.Dock="Top"/>
-        <Grid Height="32" VerticalAlignment="Top" HorizontalAlignment="Stretch" Background="Gray" DockPanel.Dock="Bottom"/>
-        <TabControl x:Name="uxTabs">
-            <TabItem x:Name="test">
-                <TabItem.Header>
-                    <StackPanel Orientation="Horizontal" Width="96">
+        <Grid Height="32" VerticalAlignment="Top" HorizontalAlignment="Stretch" DockPanel.Dock="Top"/>
+        <Grid Height="8" VerticalAlignment="Top" HorizontalAlignment="Stretch" DockPanel.Dock="Bottom"/>
+        <TabControl x:Name="uxTabs" ItemsSource="{Binding Tabs}">
+            <TabControl.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal" MinWidth="128" MaxWidth="256">
                         <Ellipse Height="10" Width="10" Fill="Black" />
-                        <TextBlock Margin="3"><Run Text="Test"/></TextBlock>
+                        <TextBlock Margin="3"><Run Text="{Binding Title}"/></TextBlock>
                     </StackPanel>
-                </TabItem.Header>
-                <awe:WebControl Source="http://yandex.ru/"/>
-            </TabItem>
-            
+                </DataTemplate>
+            </TabControl.ItemTemplate>
+            <TabControl.ContentTemplate>
+                <DataTemplate>
+                    <awe:WebControl Source="{Binding Url}"/>
+                </DataTemplate>
+            </TabControl.ContentTemplate>
         </TabControl>
     </DockPanel>
 
