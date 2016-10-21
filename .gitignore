@@ -1,0 +1,102 @@
+#----------------------------------- DEFAULTS -----------------------------
+# C++ objects and libs
+#*.slo
+#*.lo
+#*.o
+#*.a
+#*.la
+#*.lai
+#*.so
+#*.dll
+#*.dylib
+# Qt-es
+#
+#/.qmake.cache
+#/.qmake.stash
+#*.pro.user
+#*.pro.user.*
+#*.qbs.user
+#*.qbs.user.*
+#*.moc
+#moc_*.cpp
+#qrc_*.cpp
+#ui_*.h
+#Makefile*
+#*build-*
+# QtCreator
+#*.autosave
+#QtCtreator Qml
+#*.qmlproject.user
+#*.qmlproject.user.*
+#--------------------------------------------------------------------------
+
+#Blacklist everything
+*
+
+#Whitelist dirs
+!*/
+
+#Blacklist dirs
+build-*/
+bin/
+obj/
+
+#Whitelist project files
+!*.pro
+!*.csproj
+!*.sln
+
+#Whitelist cpp files
+!*.c
+!*.cpp
+!*.h
+!*.qml
+!*.qrc
+!qmldir
+
+#Blacklist cpp files
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
+
+#Whitelist cs files
+!*.cs
+!*.xaml
+
+#Blacklist cs files
+
+#Whitelist misc
+!.gitignore
+!*LICENSE*
+!*.php
+!*.py
+!*.js
+!*.json
+!*.html
+!*.css
+!*.resx
+!*.config
+!*.manifest
+!*.settings
+!*.yml
+!*.txt
+!*.md
+!*.cd
+!*.snk
+!*.enc
+!*.bat
+!*.sh
+!*.dll
+!*.exe
+!*.ico
+!*.png
+!*.jpg
+!*.svg
+!*.db
+!*.zip
+!*.7z
+!*.ttf
+!*.otf
+
+#Blacklist misc
+*build-*
