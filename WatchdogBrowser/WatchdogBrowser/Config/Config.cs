@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using WatchdogBrowser.Models;
 
 namespace WatchdogBrowser.Config {
     public class Config {
@@ -27,9 +27,6 @@ namespace WatchdogBrowser.Config {
 
         private Config() {
             configPath = Properties.Settings.Default.ConfigFilename;
-            Ready += (s, h) => {
-                Debug.WriteLine("CONFIG is ready!");
-            };
             Initialize();
         }
 
@@ -43,9 +40,7 @@ namespace WatchdogBrowser.Config {
             var configText = await ReadConfig();
             configIsReady = true;
             ParseConfig(configText);
-            if (Ready != null) {
-                Ready(this, EventArgs.Empty);
-            }
+            Ready?.Invoke(this, EventArgs.Empty);
         }
 
         async Task<string> ReadConfig() {
@@ -61,7 +56,11 @@ namespace WatchdogBrowser.Config {
         void ParseConfig(string xmlString) {
             //
         }
+
+
+        List<SiteModel> sites = new List<SiteModel>();
     }
+
 }
 /*
  * Пример xml

@@ -99,6 +99,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Config\Config.cs" />
+    <Compile Include="Models\SiteMirrorModel.cs" />
+    <Compile Include="Models\SiteModel.cs" />
     <Compile Include="Models\TabItemModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\ViewModelLocator.cs" />

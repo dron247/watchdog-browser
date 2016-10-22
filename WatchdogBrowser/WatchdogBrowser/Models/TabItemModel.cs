@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace WatchdogBrowser.Models {
     public class TabItemModel : ObservableObject {
@@ -35,6 +36,12 @@ namespace WatchdogBrowser.Models {
             }
             set {
                 Set<bool>(nameof(this.Closeable), ref closeable, value);
+            }
+        }
+
+        public Visibility CloseButtonVisibility {
+            get {
+                return Closeable ? Visibility.Visible : Visibility.Hidden;
             }
         }
     }

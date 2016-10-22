@@ -4,8 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using WatchdogBrowser.Models;
 
-namespace WatchdogBrowser.ViewModel
-{
+namespace WatchdogBrowser.ViewModel {
     /// <summary>
     /// This class contains properties that the main View can data bind to.
     /// <para>
@@ -18,13 +17,11 @@ namespace WatchdogBrowser.ViewModel
     /// See http://www.galasoft.ch/mvvm
     /// </para>
     /// </summary>
-    public class MainViewModel : ViewModelBase
-    {
+    public class MainViewModel : ViewModelBase {
         /// <summary>
         /// Initializes a new instance of the MainViewModel class.
         /// </summary>
-        public MainViewModel()
-        {
+        public MainViewModel() {
             ////if (IsInDesignMode)
             ////{
             ////    // Code runs in Blend --> create design time data.
@@ -51,9 +48,9 @@ namespace WatchdogBrowser.ViewModel
 
 
         private void CreateMockupTabs() {
-            Tabs.Add(new TabItemModel { Title = "Супер сайт 1", Url = "http://yandex.ru/" });
-            Tabs.Add(new TabItemModel { Title = "Отдых", Url = "http://bash.im/" });
-            Tabs.Add(new TabItemModel { Title = "Просто так", Url = "http://9gag.com/" });
+            Tabs.Add(new TabItemModel { Title = "Супер сайт 1", Url = "http://yandex.ru/", Closeable = false });
+            Tabs.Add(new TabItemModel { Title = "Отдых", Url = "http://bash.im/", Closeable = true });
+            Tabs.Add(new TabItemModel { Title = "Просто так", Url = "http://9gag.com/", Closeable = true });
             RaisePropertyChanged("Tabs");
         }
     }
