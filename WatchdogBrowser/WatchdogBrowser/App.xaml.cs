@@ -19,6 +19,10 @@ namespace WatchdogBrowser {
         private void OnStartup(object sender, StartupEventArgs e) {
             var config = Config.Config.DefaultInstance;
             var mainWindow = new MainWindow();
+
+
+
+
             mainWindow.Closing += (sndr, eventData) => {
                 if (MessageBox.Show("Вы действительно хотите завершить работу приложения?", "Внимание!", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.No) {
                     eventData.Cancel = true;
@@ -26,6 +30,11 @@ namespace WatchdogBrowser {
                 }
             };
             mainWindow.Show();
+        }
+
+        private void Application_Exit(object sender, ExitEventArgs e) {
+            //
+
         }
     }
 }

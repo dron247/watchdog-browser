@@ -4,17 +4,21 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WatchdogBrowser"
-        xmlns:awe="http://schemas.awesomium.com/winfx" x:Class="WatchdogBrowser.MainWindow"
+        xmlns:awe="http://schemas.awesomium.com/winfx" 
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity" 
+        xmlns:cmd="http://www.galasoft.ch/mvvmlight"
+        xmlns:controls="clr-namespace:WatchdogBrowser.Controls"
+        x:Class="WatchdogBrowser.MainWindow"
         mc:Ignorable="d"
-        Title="MainWindow" MinHeight="350" MinWidth="525" Height="350" Width="525"
-        WindowState="Maximized" Icon="web_hi_res_512.ico"
+        Title="MainWindow" MinHeight="350" MinWidth="525" Height="600" Width="800"
+        WindowState="Normal" Icon="web_hi_res_512.ico"
         DataContext="{Binding Main, Source={StaticResource Locator}}">
 
 
     <DockPanel LastChildFill="True" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-        <Grid Height="32" VerticalAlignment="Top" HorizontalAlignment="Stretch" DockPanel.Dock="Top"/>
-        <Grid Height="8" VerticalAlignment="Top" HorizontalAlignment="Stretch" DockPanel.Dock="Bottom"/>
-        <TabControl x:Name="uxTabs" ItemsSource="{Binding Tabs}">
+        <Grid Height="16" VerticalAlignment="Top" HorizontalAlignment="Stretch" DockPanel.Dock="Top"/>
+        <Grid Height="16" VerticalAlignment="Top" HorizontalAlignment="Stretch" DockPanel.Dock="Bottom"/>
+        <controls:NonReloadingTabControl x:Name="uxTabs" ItemsSource="{Binding Tabs, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding SelectedTab}">
             <TabControl.ItemTemplate>
                 <DataTemplate>
                     <Grid Width="auto" MinWidth="128" MaxWidth="256">
@@ -24,8 +28,10 @@
                             <ColumnDefinition Width="auto"/>
                         </Grid.ColumnDefinitions>
                         <Ellipse Grid.Column="0" Height="16" Width="16" Fill="Black" />
-                        <TextBlock Grid.Column="1" Margin="10, 3, 16, 3"><Run Text="{Binding Title}"/></TextBlock>
-                        <Button Grid.Column="2" HorizontalAlignment="Right" Visibility="{Binding CloseButtonVisibility}" IsEnabled="{Binding Closeable}">
+                        <TextBlock Grid.Column="1" Margin="10, 3, 16, 3">
+                            <Run Text="{Binding Title, Mode=OneWay}"/>
+                        </TextBlock>
+                        <Button Grid.Column="2" HorizontalAlignment="Right" Command="{Binding CloseTabCommand}" Visibility="{Binding CloseButtonVisibility}" IsEnabled="{Binding Closeable}">
                             <TextBlock Foreground="#FF685E5E" Margin="3,0" FontWeight="Bold">ЗАКРЫТЬ</TextBlock>
                         </Button>
                     </Grid>
@@ -33,10 +39,10 @@
             </TabControl.ItemTemplate>
             <TabControl.ContentTemplate>
                 <DataTemplate>
-                    <awe:WebControl Source="{Binding Url}"/>
+                    <controls:BrowserTabContent Content="{Binding}"/>
                 </DataTemplate>
             </TabControl.ContentTemplate>
-        </TabControl>
+        </controls:NonReloadingTabControl>
     </DockPanel>
 
 

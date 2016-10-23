@@ -42,16 +42,37 @@ namespace WatchdogBrowser.ViewModel {
             }
             set {
                 tabs = value;
-                RaisePropertyChanged("Tabs");
+                RaisePropertyChanged(nameof(Tabs));
+            }
+        }
+
+        private TabItemModel selectedTab;
+        public TabItemModel SelectedTab {
+            get {
+                return selectedTab;
+            }
+            set {
+                selectedTab = value;
+                Debug.WriteLine(selectedTab?.Title);
+                RaisePropertyChanged(nameof(SelectedTab));
             }
         }
 
 
         private void CreateMockupTabs() {
-            Tabs.Add(new TabItemModel { Title = "Супер сайт 1", Url = "http://yandex.ru/", Closeable = false });
-            Tabs.Add(new TabItemModel { Title = "Отдых", Url = "http://bash.im/", Closeable = true });
-            Tabs.Add(new TabItemModel { Title = "Просто так", Url = "http://9gag.com/", Closeable = true });
-            RaisePropertyChanged("Tabs");
+            Tabs.Add(new TabItemModel { Title = "Вкладка тест", Url = "https://github.com/", Closeable = false });
+            //Tabs.Add(new TabItemModel { Title = "Проверка", Url = "http://yandex.ru/", Closeable = true });
+            //Tabs.Add(new TabItemModel { Title = "Отдых", Url = "http://bash.im/", Closeable = true });
+            //Tabs.Add(new TabItemModel { Title = "Просто так", Url = "http://9gag.com/", Closeable = true });
+            foreach (var tab in Tabs) {
+                tab.Close += (sender, args) => {
+                    Tabs.Remove((TabItemModel)sender);
+                    RaisePropertyChanged(nameof(Tabs));
+                    Debug.WriteLine(Tabs.Count);
+                };
+            }
+            Debug.WriteLine(Tabs.Count);
+            RaisePropertyChanged(nameof(Tabs));
         }
     }
 }
