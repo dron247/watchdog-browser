@@ -11,6 +11,8 @@ namespace WatchdogBrowser.Models {
         public int SwitchMirrorTimeout { get; set; }
         public int UpdateTimeout { get; set; }
 
-        public List<SiteMirrorModel> Mirrors { get; set; } = new List<SiteMirrorModel>(1);
+        public List<string> Mirrors { get; set; }
+
+        public List<string> Whitelist { get; set; }
     }
 }
