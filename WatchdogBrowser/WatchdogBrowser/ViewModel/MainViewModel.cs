@@ -60,15 +60,20 @@ namespace WatchdogBrowser.ViewModel {
 
 
         private void CreateMockupTabs() {
-            Tabs.Add(new TabItemModel { Title = "Вкладка тест", Url = "https://github.com/", Closeable = false });
+            Tabs.Add(new TabItemModel { Title = "Вкладка тест", Url = "https://github.com/", Closeable = true });
             //Tabs.Add(new TabItemModel { Title = "Проверка", Url = "http://yandex.ru/", Closeable = true });
             //Tabs.Add(new TabItemModel { Title = "Отдых", Url = "http://bash.im/", Closeable = true });
             //Tabs.Add(new TabItemModel { Title = "Просто так", Url = "http://9gag.com/", Closeable = true });
             foreach (var tab in Tabs) {
                 tab.Close += (sender, args) => {
-                    Tabs.Remove((TabItemModel)sender);
-                    RaisePropertyChanged(nameof(Tabs));
-                    Debug.WriteLine(Tabs.Count);
+                    if (Tabs.Count == 1) {
+                        App.Current.Shutdown();
+                    } else {
+                        Tabs.Remove((TabItemModel)sender);
+                        RaisePropertyChanged(nameof(Tabs));
+
+                        Debug.WriteLine(Tabs.Count);
+                    }
                 };
             }
             Debug.WriteLine(Tabs.Count);
