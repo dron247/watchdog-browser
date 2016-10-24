@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using WatchdogBrowser.CustomEventArgs;
+using WatchdogBrowser.Handlers;
 
 namespace WatchdogBrowser.Models {
     public class TabItemModel : ObservableObject {
@@ -72,7 +73,8 @@ namespace WatchdogBrowser.Models {
                 browser = value;
                 if (browser != null) {
                     browser.LoadError += Browser_LoadError;
-                    var lHandler =  new CustomLifespanHandler();
+                    browser.MenuHandler = new WatchdogMenuHandler();
+                    var lHandler =  new WatchdogLifespanHandler();
                     lHandler.NewTabRequest += (s, e) => {
                         NewTabRequest?.Invoke(this, e);
                     };
@@ -87,28 +89,9 @@ namespace WatchdogBrowser.Models {
 
 
 
-        private class CustomLifespanHandler : ILifeSpanHandler {
 
-            public event EventHandler<TabRequestEventArgs> NewTabRequest;
 
-            public bool DoClose(IWebBrowser browserControl, IBrowser browser) {
-                return false;
-            }
-
-            public void OnAfterCreated(IWebBrowser browserControl, IBrowser browser) {
-            }
-
-            public void OnBeforeClose(IWebBrowser browserControl, IBrowser browser) {
-            }
-
-            public bool OnBeforePopup(IWebBrowser browserControl, IBrowser browser, IFrame frame, string targetUrl, string targetFrameName, WindowOpenDisposition targetDisposition, bool userGesture, IPopupFeatures popupFeatures, IWindowInfo windowInfo, IBrowserSettings browserSettings, ref bool noJavascriptAccess, out IWebBrowser newBrowser) {
-                //return true;
-                //return parent.OnBeforePopup(browserControl, browser, frame, targetUrl, targetFrameName, targetDisposition, userGesture, popupFeatures, windowInfo, browserSettings, ref noJavascriptAccess, out newBrowser);
-                newBrowser = null;
-                NewTabRequest?.Invoke(this, new TabRequestEventArgs { URL = targetUrl });
-                return true;
-            }
-        }
+       
 
 
 
