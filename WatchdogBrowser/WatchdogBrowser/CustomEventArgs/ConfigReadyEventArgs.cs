@@ -7,7 +7,7 @@ using WatchdogBrowser.Models;
 
 namespace WatchdogBrowser.CustomEventArgs {
     public class ConfigReadyEventArgs : System.EventArgs {
-        public ConfigReadyEventArgs(List<SiteModel> sites) { }
+        public ConfigReadyEventArgs(List<SiteModel> sites) { Sites = sites; }
         public List<SiteModel> Sites;
     }
 }

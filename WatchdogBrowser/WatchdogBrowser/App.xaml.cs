@@ -17,7 +17,6 @@ namespace WatchdogBrowser {
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void OnStartup(object sender, StartupEventArgs e) {
-            var config = Config.Config.DefaultInstance;
             var mainWindow = new MainWindow();
 
 

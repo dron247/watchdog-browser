@@ -11,54 +11,44 @@ using WatchdogBrowser.CustomEventArgs;
 using WatchdogBrowser.Models;
 
 namespace WatchdogBrowser.Config {
-    public class Config {
-
-        static Config instance = null;
-        public static Config DefaultInstance {
-            get {
-                if (instance == null) {
-                    instance = new Config();
-                }
-                return instance;
-            }
-        }
+    public class SitesConfig {
 
         public event EventHandler<ConfigReadyEventArgs> Ready;
 
-        bool configIsReady = false;
+        public List<SiteModel> Sites {
+            get {
+                return sites;
+            }
+        }
+
+        List<SiteModel> sites = new List<SiteModel>();
+
         string configPath;
 
-        private Config() {
+        public SitesConfig() {
             configPath = Properties.Settings.Default.ConfigFilename;
-            Initialize();
         }
 
 
-        public bool ConfigIsReady {
-            get { return configIsReady; }
-        }
-
-
-        async void Initialize() {
-            var configText = await ReadConfig();
-            configIsReady = true;
-            ParseConfig(configText);
+        public void Initialize() {
+            var configText = ReadConfig();
+            sites = ParseConfig(configText);
             Ready?.Invoke(this, new ConfigReadyEventArgs(sites));
         }
 
-        async Task<string> ReadConfig() {
+        string ReadConfig() {
             if (!File.Exists(configPath)) {
                 return string.Empty;
             }
             using (var reader = File.OpenText(configPath)) {
-                return await reader.ReadToEndAsync();
+                return reader.ReadToEnd();
             }
         }
 
 
-        void ParseConfig(string xmlString) {
+        List<SiteModel> ParseConfig(string xmlString) {
+            List<SiteModel> retval = new List<SiteModel>();
             if (xmlString.Equals(string.Empty)) {
-                sites.Clear();
                 var siteModel = new SiteModel {
                     Name = "Файл конфигупации не найден",
                     UpdateInterval = 0,
@@ -68,14 +58,13 @@ namespace WatchdogBrowser.Config {
                     Whitelist = new List<string>()
                 };
 
-                sites.Add(siteModel);
-                return;
+                retval.Add(siteModel);
+                return retval;
             }
 
             var xdoc = XDocument.Parse(xmlString);
             var xSites = xdoc.Descendants("sites");
             if (xSites.Count() > 0) {
-                sites.Clear();
                 //берём только первый элемент, по ТЗ он один, но такой код даёт задел на доработку
                 var site = xSites.First();
                 var siteName = string.Empty;
@@ -146,19 +135,14 @@ namespace WatchdogBrowser.Config {
                     Whitelist = whitelist
                 };
 
-                sites.Add(siteModel);
+                retval.Add(siteModel);
 
             }//end if count > 0
+            return retval;
         }//end PardeConfig
 
 
-        public List<SiteModel> Sites {
-            get {
-                return sites;
-            }
-        }
-
-        List<SiteModel> sites = new List<SiteModel>();
+        
     }
 
 }

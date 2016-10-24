@@ -2,6 +2,7 @@ using GalaSoft.MvvmLight;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using WatchdogBrowser.Config;
 using WatchdogBrowser.Models;
 
 namespace WatchdogBrowser.ViewModel {
@@ -18,6 +19,9 @@ namespace WatchdogBrowser.ViewModel {
     /// </para>
     /// </summary>
     public class MainViewModel : ViewModelBase {
+
+        SitesConfig config = new SitesConfig();
+
         /// <summary>
         /// Initializes a new instance of the MainViewModel class.
         /// </summary>
@@ -30,9 +34,35 @@ namespace WatchdogBrowser.ViewModel {
             ////{
             ////    // Code runs "for real"
             ////}            
-            CreateMockupTabs();
+            config.Ready += Config_Ready;
+            config.Initialize();
+            //CreateMockupTabs();
         }
 
+        private void Config_Ready(object sender, CustomEventArgs.ConfigReadyEventArgs e) {
+            var sitesList = e.Sites;
+
+            var prepTabs = new List<TabItemModel>();
+            foreach(var site in sitesList) {
+                var prepTab = new TabItemModel();
+                prepTab.Title = site.Name;
+                prepTab.Url = site.Mirrors[0];
+                prepTab.Closeable = false;
+                prepTab.Close += TabClosed;
+                Tabs.Add(prepTab);
+            }
+        }
+
+        private void TabClosed(object sender, System.EventArgs e) {
+            if (Tabs.Count == 1) {
+                App.Current.Shutdown();
+            } else {
+                Tabs.Remove((TabItemModel)sender);
+                RaisePropertyChanged(nameof(Tabs));
+
+                Debug.WriteLine(Tabs.Count);
+            }
+        }
 
         private ObservableCollection<TabItemModel> tabs = new ObservableCollection<TabItemModel>();
 

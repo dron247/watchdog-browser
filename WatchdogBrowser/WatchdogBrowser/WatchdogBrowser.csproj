@@ -120,7 +120,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Config\Config.cs" />
+    <Compile Include="Config\SitesConfig.cs" />
     <Compile Include="Controls\BrowserTabContent.xaml.cs">
       <DependentUpon>BrowserTabContent.xaml</DependentUpon>
     </Compile>
