@@ -31,6 +31,11 @@ namespace WatchdogBrowser {
                 }
             };
 
+            mainWindow.Closed += (sndr, eventData) => {
+                Cef.Shutdown();
+                Application.Current.Shutdown();
+            };
+
             var settings = new CefSettings();
             settings.CachePath = "cache";
             bool multithread = true;
@@ -43,10 +48,6 @@ namespace WatchdogBrowser {
 
 
             mainWindow.Show();
-        }
-
-        private void Application_Exit(object sender, ExitEventArgs e) {
-            Cef.Shutdown();
         }
     }
 }

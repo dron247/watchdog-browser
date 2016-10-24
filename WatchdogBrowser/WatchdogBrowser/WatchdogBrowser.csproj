@@ -129,6 +129,8 @@
     <Compile Include="CustomEventArgs\TabRequestEventArgs.cs" />
     <Compile Include="Handlers\BrowserProcessHandler.cs" />
     <Compile Include="Handlers\WatchdogBrowserProcessHandler.cs" />
+    <Compile Include="Handlers\WatchdogLifespanHandler.cs" />
+    <Compile Include="Handlers\WatchdogMenuHandler.cs" />
     <Compile Include="Models\SiteModel.cs" />
     <Compile Include="Models\TabItemModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />

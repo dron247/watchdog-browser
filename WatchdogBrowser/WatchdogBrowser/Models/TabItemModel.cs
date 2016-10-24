@@ -22,6 +22,7 @@ namespace WatchdogBrowser.Models {
 
         public event EventHandler Close;
         public event EventHandler<TabRequestEventArgs> NewTabRequest;
+        public event EventHandler CloseTabRequest;
 
         string title = "Без имени";
         string url = "#";
@@ -74,9 +75,12 @@ namespace WatchdogBrowser.Models {
                 if (browser != null) {
                     browser.LoadError += Browser_LoadError;
                     browser.MenuHandler = new WatchdogMenuHandler();
-                    var lHandler =  new WatchdogLifespanHandler();
+                    var lHandler = new WatchdogLifespanHandler();
                     lHandler.NewTabRequest += (s, e) => {
                         NewTabRequest?.Invoke(this, e);
+                    };
+                    lHandler.CloseTabRequest += (s, e) => {
+                        CloseTabRequest?.Invoke(this, e);
                     };
                     browser.LifeSpanHandler = lHandler;
                 }
@@ -91,7 +95,7 @@ namespace WatchdogBrowser.Models {
 
 
 
-       
+
 
 
 

@@ -55,10 +55,20 @@ namespace WatchdogBrowser.ViewModel {
                 prepTab.Url = site.Mirrors[0];
                 prepTab.Closeable = false;
                 prepTab.Close += TabClosed;
+                prepTab.CloseTabRequest += PrepTab_SelfCloseRequest;
                 prepTab.NewTabRequest += Tab_NewTabRequest;
                 Tabs.Add(prepTab);
             }
             RaisePropertyChanged(nameof(Tabs));
+        }
+
+        private void PrepTab_SelfCloseRequest(object sender, EventArgs e) {
+            /*Application.Current.Dispatcher.Invoke(() => {
+                MessageBox.Show(((TabItemModel)sender).Title);
+            });*/
+            Application.Current.Dispatcher.Invoke(() => {
+                CloseTab(SelectedTab);
+            });
         }
 
         private void Tab_NewTabRequest(object sender, CustomEventArgs.TabRequestEventArgs e) {
@@ -72,10 +82,14 @@ namespace WatchdogBrowser.ViewModel {
         }
 
         private void TabClosed(object sender, System.EventArgs e) {
+            CloseTab((TabItemModel)sender);
+        }
+
+        private void CloseTab(TabItemModel prey) {
             if (Tabs.Count == 1) {
                 App.Current.Shutdown();
             } else {
-                Tabs.Remove((TabItemModel)sender);
+                Tabs.Remove(prey);
                 RaisePropertyChanged(nameof(Tabs));
 
                 Debug.WriteLine(Tabs.Count);
