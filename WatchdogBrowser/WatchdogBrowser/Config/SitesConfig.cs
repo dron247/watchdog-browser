@@ -32,8 +32,12 @@ namespace WatchdogBrowser.Config {
 
         public void Initialize() {
             var configText = ReadConfig();
-            sites = ParseConfig(configText);
-            Ready?.Invoke(this, new ConfigReadyEventArgs(sites));
+            try {
+                sites = ParseConfig(configText);
+                Ready?.Invoke(this, new ConfigReadyEventArgs(sites));
+            }catch(Exception e) {
+                throw e;
+            }
         }
 
         string ReadConfig() {
@@ -62,87 +66,104 @@ namespace WatchdogBrowser.Config {
                 return retval;
             }
 
-            var xdoc = XDocument.Parse(xmlString);
-            var xSites = xdoc.Descendants("sites");
-            if (xSites.Count() > 0) {
-                //берём только первый элемент, по ТЗ он один, но такой код даёт задел на доработку
-                var site = xSites.First();
-                var siteName = string.Empty;
-                int updateOk, updateFail, updateTimeout;
-                List<string> mirrors = new List<string>();
-                List<string> whitelist = new List<string>();
+            try {
+                var xdoc = XDocument.Parse(xmlString);
+                var xSites = xdoc.Descendants("sites");
+                if (xSites.Count() > 0) {
+                    //берём только первый элемент, по ТЗ он один, но такой код даёт задел на доработку
+                    var xSite = xSites.Elements().First();
+                    var siteName = string.Empty;
+                    int updateOk = 10, updateFail = 60, updateTimeout = 20;
+                    List<string> mirrors = new List<string>();
+                    List<string> whitelist = new List<string>();
 
 
+                    foreach (var attr in xSite.Attributes()) {
+                        if (attr.Name == "name") {
+                            try {
+                                siteName = attr.Value;
+                            } catch {
+                                siteName = "Неизвестно";
+                            }
+                            continue;
+                        }
 
-                try {
-                    siteName = site.Attribute("name").Value;
-                } catch {
-                    siteName = "Неизвестно";
-                }
+                        if (attr.Name == "updateOk") {
+                            try {
+                                updateOk = int.Parse(attr.Value);
+                            } catch {
+                                updateOk = 10;
+                            }
+                            continue;
+                        }
 
-                try {
-                    updateOk = int.Parse(site.Attribute("updateOk").Value);
-                } catch {
-                    updateOk = 10;
-                }
+                        if (attr.Name == "updateFail") {
+                            try {
+                                updateFail = int.Parse(attr.Value);
+                            } catch {
+                                updateFail = 60;
+                            }
+                            continue;
+                        }
 
-                try {
-                    updateFail = int.Parse(site.Attribute("updateFail").Value);
-                } catch {
-                    updateFail = 60;
-                }
-
-                try {
-                    updateTimeout = int.Parse(site.Attribute("updateTimeout").Value);
-                } catch {
-                    updateTimeout = 20;
-                }
-
-                var xMirrors = site.Descendants("mirrors");
-                foreach (var xMirror in xMirrors) {
-                    var protocol = string.Empty;
-                    var domain = string.Empty;
-                    try {
-                        protocol = xMirror.Attribute("protocol").Value;
-                    } catch {
-                        protocol = "http";
+                        if (attr.Name == "updateTimeout") {
+                            try {
+                                updateTimeout = int.Parse(attr.Value);
+                            } catch {
+                                updateTimeout = 20;
+                            }
+                            continue;
+                        }
                     }
 
-                    try {
-                        domain = xMirror.Attribute("domain").Value;
-                    } catch {
-                        domain = "github.com";
-                    }
+                    var xMirrors = xSite.Descendants("mirrors");
+                    foreach (var xMirror in xMirrors.Elements()) {
+                        var protocol = string.Empty;
+                        var domain = string.Empty;
+                        try {
+                            protocol = xMirror.Attribute("protocol").Value;
+                        } catch {
+                            protocol = "http";
+                        }
 
-                    mirrors.Add($"{protocol}://{domain}/");
-                }//end foreach xMirrors
+                        try {
+                            domain = xMirror.Attribute("domain").Value;
+                        } catch {
+                            domain = "github.com";
+                        }
 
-                var xWhitelist = site.Descendants("whitelist");
-                foreach (var xPath in xWhitelist) {
-                    var path = string.Empty;
-                    try {
-                        path = xPath.Attribute("uri").Value;
-                    } catch { }
-                    whitelist.Add(path);
-                }//end foreach whitelist
+                        mirrors.Add($"{protocol}://{domain}/");
+                    }//end foreach xMirrors
 
-                var siteModel = new SiteModel {
-                    Name = siteName,
-                    UpdateInterval = updateOk,
-                    SwitchMirrorTimeout = updateFail,
-                    UpdateTimeout = updateTimeout,
-                    Mirrors = mirrors,
-                    Whitelist = whitelist
-                };
+                    var xWhitelist = xSite.Descendants("whitelist");
+                    foreach (var xPath in xWhitelist.Elements()) {
+                        var path = string.Empty;
+                        try {
+                            path = xPath.Attribute("uri").Value;
+                        } catch { }
+                        whitelist.Add(path);
+                    }//end foreach whitelist
 
-                retval.Add(siteModel);
+                    var siteModel = new SiteModel {
+                        Name = siteName,
+                        UpdateInterval = updateOk,
+                        SwitchMirrorTimeout = updateFail,
+                        UpdateTimeout = updateTimeout,
+                        Mirrors = mirrors,
+                        Whitelist = whitelist
+                    };
 
-            }//end if count > 0
+                    retval.Add(siteModel);
+
+                }//end if count > 0
+            }catch(Exception ex) {
+                throw new Exception($"Ошибка чтения файла конфигурации: {ex.Message}");
+            }
             return retval;
         }//end PardeConfig
 
 
-        
+
     }
 
 }

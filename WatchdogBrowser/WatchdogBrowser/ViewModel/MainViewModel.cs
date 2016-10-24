@@ -1,7 +1,9 @@
 using GalaSoft.MvvmLight;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Windows;
 using WatchdogBrowser.Config;
 using WatchdogBrowser.Models;
 
@@ -35,7 +37,11 @@ namespace WatchdogBrowser.ViewModel {
             ////    // Code runs "for real"
             ////}            
             config.Ready += Config_Ready;
-            config.Initialize();
+            try {
+                config.Initialize();
+            } catch (Exception e) {
+                MessageBox.Show($"Ошибка чтения файла конфигурации {e.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
             //CreateMockupTabs();
         }
 
@@ -43,14 +49,26 @@ namespace WatchdogBrowser.ViewModel {
             var sitesList = e.Sites;
 
             var prepTabs = new List<TabItemModel>();
-            foreach(var site in sitesList) {
+            foreach (var site in sitesList) {
                 var prepTab = new TabItemModel();
                 prepTab.Title = site.Name;
                 prepTab.Url = site.Mirrors[0];
                 prepTab.Closeable = false;
                 prepTab.Close += TabClosed;
+                prepTab.NewTabRequest += Tab_NewTabRequest;
                 Tabs.Add(prepTab);
             }
+            RaisePropertyChanged(nameof(Tabs));
+        }
+
+        private void Tab_NewTabRequest(object sender, CustomEventArgs.TabRequestEventArgs e) {
+            Application.Current.Dispatcher.Invoke(() => {
+                var tab = new TabItemModel { Title = "Вкладка тест", Url = e.URL, Closeable = true };
+                tab.Close += TabClosed;
+                Tabs.Add(tab);
+                SelectedTab = tab;
+                RaisePropertyChanged(nameof(Tabs));
+            });
         }
 
         private void TabClosed(object sender, System.EventArgs e) {
@@ -82,32 +100,39 @@ namespace WatchdogBrowser.ViewModel {
                 return selectedTab;
             }
             set {
-                selectedTab = value;
-                Debug.WriteLine(selectedTab?.Title);
-                RaisePropertyChanged(nameof(SelectedTab));
+                Set<TabItemModel>(nameof(this.SelectedTab), ref selectedTab, value);
             }
         }
 
+        //private int selectedIndex = 0;
+        //public int SelectedIndex {
+        //    get { return SelectedIndex; }
+        //    set {
+        //        Set<int>(nameof(this.SelectedIndex), ref selectedIndex, value);
+        //    }
+        //}
 
-        private void CreateMockupTabs() {
-            Tabs.Add(new TabItemModel { Title = "Вкладка тест", Url = "https://github.com/", Closeable = true });
-            //Tabs.Add(new TabItemModel { Title = "Проверка", Url = "http://yandex.ru/", Closeable = true });
-            //Tabs.Add(new TabItemModel { Title = "Отдых", Url = "http://bash.im/", Closeable = true });
-            //Tabs.Add(new TabItemModel { Title = "Просто так", Url = "http://9gag.com/", Closeable = true });
-            foreach (var tab in Tabs) {
-                tab.Close += (sender, args) => {
-                    if (Tabs.Count == 1) {
-                        App.Current.Shutdown();
-                    } else {
-                        Tabs.Remove((TabItemModel)sender);
-                        RaisePropertyChanged(nameof(Tabs));
 
-                        Debug.WriteLine(Tabs.Count);
-                    }
-                };
-            }
-            Debug.WriteLine(Tabs.Count);
-            RaisePropertyChanged(nameof(Tabs));
-        }
+
+        //private void CreateMockupTabs() {
+        //    Tabs.Add(new TabItemModel { Title = "Вкладка тест", Url = "https://github.com/", Closeable = true });
+        //    Tabs.Add(new TabItemModel { Title = "Проверка", Url = "http://yandex.ru/", Closeable = true });
+        //    Tabs.Add(new TabItemModel { Title = "Отдых", Url = "http://bash.im/", Closeable = true });
+        //    Tabs.Add(new TabItemModel { Title = "Просто так", Url = "http://9gag.com/", Closeable = true });
+        //    foreach (var tab in Tabs) {
+        //        tab.Close += (sender, args) => {
+        //            if (Tabs.Count == 1) {
+        //                App.Current.Shutdown();
+        //            } else {
+        //                Tabs.Remove((TabItemModel)sender);
+        //                RaisePropertyChanged(nameof(Tabs));
+
+        //                Debug.WriteLine(Tabs.Count);
+        //            }
+        //        };
+        //    }
+        //    Debug.WriteLine(Tabs.Count);
+        //    RaisePropertyChanged(nameof(Tabs));
+        //}
     }
 }
