@@ -57,6 +57,21 @@ namespace WatchdogBrowser.Config {
 
 
         void ParseConfig(string xmlString) {
+            if (xmlString.Equals(string.Empty)) {
+                sites.Clear();
+                var siteModel = new SiteModel {
+                    Name = "Файл конфигупации не найден",
+                    UpdateInterval = 0,
+                    SwitchMirrorTimeout = 0,
+                    UpdateTimeout = 0,
+                    Mirrors = new List<string> { $"http://yandex.ru" },
+                    Whitelist = new List<string>()
+                };
+
+                sites.Add(siteModel);
+                return;
+            }
+
             var xdoc = XDocument.Parse(xmlString);
             var xSites = xdoc.Descendants("sites");
             if (xSites.Count() > 0) {
