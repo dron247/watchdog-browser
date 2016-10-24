@@ -11,7 +11,9 @@
     <Grid>
         <cefSharp:ChromiumWebBrowser x:Name="browser"
                                   Address="{Binding Url, Mode=TwoWay}"
+                                  Title="{Binding Title, Mode=TwoWay}"
                                   AllowDrop="False"
+                                  
                                   WebBrowser="{Binding WebBrowser, Mode=OneWayToSource}">
             <!-- Just an example of how you may override the BrowserSettings. Disabled by default since it looks so
                          incredibly ugly... -->
