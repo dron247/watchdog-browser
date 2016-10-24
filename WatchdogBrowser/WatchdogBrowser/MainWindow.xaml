@@ -10,14 +10,13 @@
         xmlns:controls="clr-namespace:WatchdogBrowser.Controls"
         x:Class="WatchdogBrowser.MainWindow"
         mc:Ignorable="d"
-        Title="MainWindow" MinHeight="350" MinWidth="525" Height="600" Width="800"
+        Title="Кобра Гарант - мониторинг" MinHeight="350" MinWidth="525" Height="600" Width="800"
         WindowState="Maximized" Icon="web_hi_res_512.ico"
         DataContext="{Binding Main, Source={StaticResource Locator}}">
 
 
     <DockPanel LastChildFill="True" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-        <Grid Height="16" VerticalAlignment="Top" HorizontalAlignment="Stretch" DockPanel.Dock="Top"/>
-        <Grid Height="16" VerticalAlignment="Top" HorizontalAlignment="Stretch" DockPanel.Dock="Bottom"/>
+        <Grid Height="24" VerticalAlignment="Top" HorizontalAlignment="Stretch" DockPanel.Dock="Bottom"/>
         <controls:NonReloadingTabControl x:Name="uxTabs" ItemsSource="{Binding Tabs, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding SelectedTab}">
             <TabControl.ItemTemplate>
                 <DataTemplate>
