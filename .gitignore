@@ -100,3 +100,4 @@ ui_*.h
 
 #Blacklist misc
 *build-*
+*.suo
