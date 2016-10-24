@@ -7,6 +7,7 @@
              xmlns:cefSharp="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf"
              xmlns:system="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
+             Unloaded="UserControl_Unloaded"
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
         <cefSharp:ChromiumWebBrowser x:Name="browser"

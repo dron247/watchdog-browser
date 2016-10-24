@@ -89,6 +89,7 @@ namespace WatchdogBrowser.ViewModel {
             if (Tabs.Count == 1) {
                 App.Current.Shutdown();
             } else {
+                //prey?.WebBrowser?.GetBrowser()?.Dispose();
                 Tabs.Remove(prey);
                 RaisePropertyChanged(nameof(Tabs));
 

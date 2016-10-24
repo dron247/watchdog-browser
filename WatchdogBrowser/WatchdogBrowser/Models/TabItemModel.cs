@@ -70,6 +70,7 @@ namespace WatchdogBrowser.Models {
         #region BROWSER
         IWpfWebBrowser browser = null;
         public IWpfWebBrowser WebBrowser {
+            get { return browser; }
             set {
                 browser = value;
                 if (browser != null) {

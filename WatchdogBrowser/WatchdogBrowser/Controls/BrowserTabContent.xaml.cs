@@ -25,8 +25,8 @@ namespace WatchdogBrowser.Controls {
             // browser.WebBrowser.
         }
 
-
-
-        
+        private void UserControl_Unloaded(object sender, RoutedEventArgs e) {
+            //browser?.GetFocusedFrame().Dispose();
+        }
     }
 }
