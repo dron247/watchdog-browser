@@ -16,6 +16,9 @@
                                   AllowDrop="False"
                                   
                                   WebBrowser="{Binding WebBrowser, Mode=OneWayToSource}">
+            <cefSharp:ChromiumWebBrowser.InputBindings>
+                <KeyBinding Key="I" Modifiers="Shift+Ctrl" Command="{Binding ShowDevtoolsCommand}"/>
+            </cefSharp:ChromiumWebBrowser.InputBindings>
             <!-- Just an example of how you may override the BrowserSettings. Disabled by default since it looks so
                          incredibly ugly... -->
             <!--<cefSharp:ChromiumWebBrowser.BrowserSettings>

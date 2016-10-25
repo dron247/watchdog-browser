@@ -21,8 +21,6 @@ namespace WatchdogBrowser.Controls {
     public partial class BrowserTabContent : UserControl {
         public BrowserTabContent() {
             InitializeComponent();
-            
-            // browser.WebBrowser.
         }
 
         private void UserControl_Unloaded(object sender, RoutedEventArgs e) {

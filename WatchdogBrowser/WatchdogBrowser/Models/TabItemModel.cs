@@ -17,6 +17,7 @@ namespace WatchdogBrowser.Models {
     public class TabItemModel : ObservableObject {
         public TabItemModel() {
             CloseTabCommand = new RelayCommand(CloseMethod);
+            ShowDevtoolsCommand = new RelayCommand(ShowDevtoolsMethod);
         }
 
 
@@ -67,6 +68,15 @@ namespace WatchdogBrowser.Models {
             Close?.Invoke(this, EventArgs.Empty);
         }
 
+
+        public ICommand ShowDevtoolsCommand { get; private set; }
+
+        void ShowDevtoolsMethod() {
+            browser?.ShowDevTools();
+        }
+
+
+
         #region BROWSER
         IWpfWebBrowser browser = null;
         public IWpfWebBrowser WebBrowser {
@@ -81,7 +91,24 @@ namespace WatchdogBrowser.Models {
                         NewTabRequest?.Invoke(this, e);
                     };
                     lHandler.CloseTabRequest += (s, e) => {
-                        CloseTabRequest?.Invoke(this, e);
+                        var brwsr = (IBrowser)s;
+                        //Debug.WriteLine("-----------CLOSE request--------");
+
+                        //Debug.WriteLine(brwsr.IsPopup);
+
+                        //Debug.WriteLine("-----------CLOSE request--------");
+                        try {
+                            //Так как обработка идёт из потока, плюс ко всему от биндинга неродного контрола, tst нужны чтобы вызвать exception
+                            //он вызывается если был открыт попап типа девтулзов, если всё норм, значит вкладка
+                            //да, костыль, но не критичный
+                            var tst = brwsr.IsPopup;
+                            var tst2 = brwsr.HasDocument;
+                            CloseTabRequest?.Invoke(this, e);
+                        } catch {
+                            //MessageBox.Show("Disposed");
+                        }
+
+                        
                     };
                     browser.LifeSpanHandler = lHandler;
                 }

@@ -90,9 +90,11 @@ namespace WatchdogBrowser.ViewModel {
         }
 
         private void PrepTab_SelfCloseRequest(object sender, EventArgs e) {
-            Application.Current.Dispatcher.Invoke(() => {
-                CloseTab(SelectedTab);
-            });
+            try {
+                Application.Current.Dispatcher.Invoke(() => {
+                    CloseTab(SelectedTab);
+                });
+            } catch { }
         }
 
         private void Tab_NewTabRequest(object sender, CustomEventArgs.TabRequestEventArgs e) {

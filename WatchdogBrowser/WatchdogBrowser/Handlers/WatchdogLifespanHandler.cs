@@ -23,7 +23,7 @@ namespace WatchdogBrowser.Handlers {
 
         public void OnBeforeClose(IWebBrowser browserControl, IBrowser browser) {
 
-            Thread thread = new Thread(() => { CloseTabRequest?.Invoke(this, EventArgs.Empty); });
+            Thread thread = new Thread(() => { CloseTabRequest?.Invoke(browser, EventArgs.Empty); });
             thread.Start();
         }
 
