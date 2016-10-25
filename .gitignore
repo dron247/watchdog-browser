@@ -102,3 +102,4 @@ ui_*.h
 *build-*
 *.suo
 WatchdogBrowser/.vs/WatchdogBrowser/v14/.suo
+*.suo

@@ -58,7 +58,7 @@ namespace WatchdogBrowser.Models {
 
         public Visibility CloseButtonVisibility {
             get {
-                return Closeable ? Visibility.Visible : Visibility.Hidden;
+                return Closeable ? Visibility.Visible : Visibility.Collapsed;
             }
         }
 
