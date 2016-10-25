@@ -11,7 +11,7 @@
         x:Class="WatchdogBrowser.MainWindow"
         mc:Ignorable="d"
         Title="Кобра Гарант - мониторинг" MinHeight="350" MinWidth="525" Height="600" Width="800"
-        WindowState="Maximized" Icon="web_hi_res_512.ico"
+        WindowState="Maximized" Icon="favicon.ico"
         DataContext="{Binding Main, Source={StaticResource Locator}}">
 
 

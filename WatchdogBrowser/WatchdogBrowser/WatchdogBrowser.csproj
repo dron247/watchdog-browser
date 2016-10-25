@@ -57,7 +57,7 @@
     <StartupObject>WatchdogBrowser.App</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>web_hi_res_512.ico</ApplicationIcon>
+    <ApplicationIcon>favicon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -194,6 +194,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="web_hi_res_512.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="favicon.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\cef.redist.x64.3.2785.1482\build\cef.redist.x64.targets" Condition="Exists('..\packages\cef.redist.x64.3.2785.1482\build\cef.redist.x64.targets')" />
