@@ -12,7 +12,15 @@
         mc:Ignorable="d"
         Title="Кобра Гарант - мониторинг" MinHeight="350" MinWidth="525" Height="600" Width="800"
         WindowState="Maximized" Icon="favicon.ico"
-        DataContext="{Binding Main, Source={StaticResource Locator}}">
+        DataContext="{Binding Main, Source={StaticResource Locator}}"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="14"
+        FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto"
+        TextOptions.TextFormattingMode="Ideal" 
+        TextOptions.TextRenderingMode="Auto"        
+        Background="{DynamicResource MaterialDesignPaper}">
 
 
     <DockPanel LastChildFill="True" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
@@ -26,25 +34,33 @@
         <controls:NonReloadingTabControl x:Name="uxTabs" ItemsSource="{Binding Tabs, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding SelectedTab}">
             <TabControl.ItemTemplate>
                 <DataTemplate>
-                    <Grid Width="auto" MinWidth="50" MaxWidth="512">
+                    <Grid Width="auto" Height="38" MinWidth="50" MaxWidth="512">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="auto"/>
                             <ColumnDefinition Width="auto"/>
                             <ColumnDefinition Width="auto"/>
                         </Grid.ColumnDefinitions>
-                        <Ellipse Grid.Column="0" Height="16" Width="16" Fill="Black" />
-                        <TextBlock Grid.Column="1" Margin="10, 3, 16, 3">
+                        <materialDesign:PackIcon Grid.Column="0" Height="20" Width="20" VerticalAlignment="Center" Kind="Airplay"/>
+                        <TextBlock Grid.Column="1" Margin="10, 3, 16, 3" VerticalAlignment="Center">
                             <Run Text="{Binding Title, Mode=OneWay}"/>
                         </TextBlock>
-                        <Button Grid.Column="2" HorizontalAlignment="Right" Command="{Binding CloseTabCommand}" Visibility="{Binding CloseButtonVisibility}" IsEnabled="{Binding Closeable}">
-                            <TextBlock Foreground="#FF685E5E" Margin="3,0" FontWeight="Bold">ЗАКРЫТЬ</TextBlock>
+                        <Button VerticalAlignment="Center" Grid.Column="2" HorizontalAlignment="Right" Command="{Binding CloseTabCommand}" Visibility="{Binding CloseButtonVisibility}" IsEnabled="{Binding Closeable}">
+                            <TextBlock Foreground="White" Margin="3,0" FontWeight="Bold">ЗАКРЫТЬ</TextBlock>
                         </Button>
                     </Grid>
                 </DataTemplate>
             </TabControl.ItemTemplate>
             <TabControl.ContentTemplate>
                 <DataTemplate>
-                    <controls:BrowserTabContent Content="{Binding}"/>
+                    <Grid>
+                        <controls:BrowserTabContent Content="{Binding}"/>
+                        <materialDesign:Card Padding="32" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"                     
+                             Value="0" Width="64" Height="64"
+                             IsIndeterminate="True" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            
+                        </materialDesign:Card>
+                    </Grid>
                 </DataTemplate>
             </TabControl.ContentTemplate>
         </controls:NonReloadingTabControl>

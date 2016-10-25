@@ -87,6 +87,7 @@ namespace WatchdogBrowser.Models {
                     browser.LoadError += Browser_LoadError;
                     browser.FrameLoadStart += Browser_FrameLoadStart;//начало загрузки
                     browser.FrameLoadEnd += Browser_FrameLoadEnd;//конец загрузки
+                    
 
                     browser.MenuHandler = new WatchdogMenuHandler();
                     var lHandler = new WatchdogLifespanHandler();
@@ -99,9 +100,9 @@ namespace WatchdogBrowser.Models {
                             //Так как обработка идёт из потока, плюс ко всему от биндинга неродного контрола, tst нужны чтобы вызвать exception
                             //он вызывается если был открыт попап типа девтулзов, если всё норм, значит вкладка
                             //да, костыль, но не критичный
-                            var tst = brwsr.IsPopup;
-                            var tst2 = brwsr.HasDocument;
-                            CloseTabRequest?.Invoke(this, e);
+                            if (!brwsr.IsPopup) {
+                                CloseTabRequest?.Invoke(this, e);
+                            }
                         } catch {
                             //MessageBox.Show("Disposed");
                         }
@@ -114,6 +115,7 @@ namespace WatchdogBrowser.Models {
 
         private void Browser_FrameLoadStart(object sender, FrameLoadStartEventArgs e) {
             //throw new NotImplementedException();
+
         }
 
         private void Browser_FrameLoadEnd(object sender, FrameLoadEndEventArgs e) {
