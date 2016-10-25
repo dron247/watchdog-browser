@@ -101,3 +101,4 @@ ui_*.h
 #Blacklist misc
 *build-*
 *.suo
+WatchdogBrowser/.vs/WatchdogBrowser/v14/.suo

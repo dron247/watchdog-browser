@@ -21,8 +21,12 @@ namespace WatchdogBrowser {
     public partial class MainWindow : Window {
         public MainWindow() {
             InitializeComponent();
+            //CommandBindings.Add(new CommandBinding(ApplicationCommands.Close, CloseTab));
         }
 
-        
+        //private void CloseTab(object sender, ExecutedRoutedEventArgs e) {
+        //    if(uxTabs.Cou)
+        //    throw new NotImplementedException();
+        //}
     }
 }

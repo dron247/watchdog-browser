@@ -85,6 +85,9 @@ namespace WatchdogBrowser.Models {
                 browser = value;
                 if (browser != null) {
                     browser.LoadError += Browser_LoadError;
+                    browser.FrameLoadStart += Browser_FrameLoadStart;//начало загрузки
+                    browser.FrameLoadEnd += Browser_FrameLoadEnd;//конец загрузки
+
                     browser.MenuHandler = new WatchdogMenuHandler();
                     var lHandler = new WatchdogLifespanHandler();
                     lHandler.NewTabRequest += (s, e) => {
@@ -92,11 +95,6 @@ namespace WatchdogBrowser.Models {
                     };
                     lHandler.CloseTabRequest += (s, e) => {
                         var brwsr = (IBrowser)s;
-                        //Debug.WriteLine("-----------CLOSE request--------");
-
-                        //Debug.WriteLine(brwsr.IsPopup);
-
-                        //Debug.WriteLine("-----------CLOSE request--------");
                         try {
                             //Так как обработка идёт из потока, плюс ко всему от биндинга неродного контрола, tst нужны чтобы вызвать exception
                             //он вызывается если был открыт попап типа девтулзов, если всё норм, значит вкладка
@@ -107,7 +105,6 @@ namespace WatchdogBrowser.Models {
                         } catch {
                             //MessageBox.Show("Disposed");
                         }
-
                         
                     };
                     browser.LifeSpanHandler = lHandler;
@@ -115,8 +112,21 @@ namespace WatchdogBrowser.Models {
             }
         }
 
+        private void Browser_FrameLoadStart(object sender, FrameLoadStartEventArgs e) {
+            //throw new NotImplementedException();
+        }
+
+        private void Browser_FrameLoadEnd(object sender, FrameLoadEndEventArgs e) {
+            //throw new NotImplementedException();
+        }
+
         private void Browser_LoadError(object sender, CefSharp.LoadErrorEventArgs e) {
-            MessageBox.Show($"Ошибка загрузки страницыю код: {e.ErrorCode}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            //MessageBox.Show($"Ошибка загрузки страницыю код: {e.ErrorCode}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            //TODO: Логика умного апдейта
+            var b = (IWpfWebBrowser)sender;
+            b.Reload();
+            
+            Debug.WriteLine($"Перезагрузка после {e.ErrorCode}; РЕАЛИЗУЙ УМНУЮ ПЕРЕЗАГРУЗКУ", "LOAD LIFECYCLE");
         }
 
 
