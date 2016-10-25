@@ -28,12 +28,9 @@ namespace WatchdogBrowser.ViewModel {
         /// Initializes a new instance of the MainViewModel class.
         /// </summary>
         public MainViewModel() {
-            ////if (IsInDesignMode)
-            ////{
+            ////if (IsInDesignMode) {
             ////    // Code runs in Blend --> create design time data.
-            ////}
-            ////else
-            ////{
+            ////} else {
             ////    // Code runs "for real"
             ////}            
             config.Ready += Config_Ready;
@@ -42,60 +39,9 @@ namespace WatchdogBrowser.ViewModel {
             } catch (Exception e) {
                 MessageBox.Show($"Ошибка чтения файла конфигурации {e.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            //CreateMockupTabs();
         }
 
-        private void Config_Ready(object sender, CustomEventArgs.ConfigReadyEventArgs e) {
-            var sitesList = e.Sites;
-
-            var prepTabs = new List<TabItemModel>();
-            foreach (var site in sitesList) {
-                var prepTab = new TabItemModel();
-                prepTab.Title = site.Name;
-                prepTab.Url = site.Mirrors[0];
-                prepTab.Closeable = false;
-                prepTab.Close += TabClosed;
-                prepTab.CloseTabRequest += PrepTab_SelfCloseRequest;
-                prepTab.NewTabRequest += Tab_NewTabRequest;
-                Tabs.Add(prepTab);
-            }
-            RaisePropertyChanged(nameof(Tabs));
-        }
-
-        private void PrepTab_SelfCloseRequest(object sender, EventArgs e) {
-            /*Application.Current.Dispatcher.Invoke(() => {
-                MessageBox.Show(((TabItemModel)sender).Title);
-            });*/
-            Application.Current.Dispatcher.Invoke(() => {
-                CloseTab(SelectedTab);
-            });
-        }
-
-        private void Tab_NewTabRequest(object sender, CustomEventArgs.TabRequestEventArgs e) {
-            Application.Current.Dispatcher.Invoke(() => {
-                var tab = new TabItemModel { Title = "Вкладка тест", Url = e.URL, Closeable = true };
-                tab.Close += TabClosed;
-                Tabs.Add(tab);
-                SelectedTab = tab;
-                RaisePropertyChanged(nameof(Tabs));
-            });
-        }
-
-        private void TabClosed(object sender, System.EventArgs e) {
-            CloseTab((TabItemModel)sender);
-        }
-
-        private void CloseTab(TabItemModel prey) {
-            if (Tabs.Count == 1) {
-                App.Current.Shutdown();
-            } else {
-                //prey?.WebBrowser?.GetBrowser()?.Dispose();
-                Tabs.Remove(prey);
-                RaisePropertyChanged(nameof(Tabs));
-
-                Debug.WriteLine(Tabs.Count);
-            }
-        }
+        #region СВОЙСТВА ПРИВЯЗКИ
 
         private ObservableCollection<TabItemModel> tabs = new ObservableCollection<TabItemModel>();
 
@@ -116,38 +62,72 @@ namespace WatchdogBrowser.ViewModel {
             }
             set {
                 Set<TabItemModel>(nameof(this.SelectedTab), ref selectedTab, value);
+
             }
         }
 
-        //private int selectedIndex = 0;
-        //public int SelectedIndex {
-        //    get { return SelectedIndex; }
-        //    set {
-        //        Set<int>(nameof(this.SelectedIndex), ref selectedIndex, value);
-        //    }
-        //}
+
+        #endregion
 
 
+        #region СОБЫТИЯ
 
-        //private void CreateMockupTabs() {
-        //    Tabs.Add(new TabItemModel { Title = "Вкладка тест", Url = "https://github.com/", Closeable = true });
-        //    Tabs.Add(new TabItemModel { Title = "Проверка", Url = "http://yandex.ru/", Closeable = true });
-        //    Tabs.Add(new TabItemModel { Title = "Отдых", Url = "http://bash.im/", Closeable = true });
-        //    Tabs.Add(new TabItemModel { Title = "Просто так", Url = "http://9gag.com/", Closeable = true });
-        //    foreach (var tab in Tabs) {
-        //        tab.Close += (sender, args) => {
-        //            if (Tabs.Count == 1) {
-        //                App.Current.Shutdown();
-        //            } else {
-        //                Tabs.Remove((TabItemModel)sender);
-        //                RaisePropertyChanged(nameof(Tabs));
+        private void Config_Ready(object sender, CustomEventArgs.ConfigReadyEventArgs e) {
+            var sitesList = e.Sites;
 
-        //                Debug.WriteLine(Tabs.Count);
-        //            }
-        //        };
-        //    }
-        //    Debug.WriteLine(Tabs.Count);
-        //    RaisePropertyChanged(nameof(Tabs));
-        //}
+            var prepTabs = new List<TabItemModel>();
+            foreach (var site in sitesList) {
+                var prepTab = new TabItemModel();
+                prepTab.Title = site.Name;
+                prepTab.Url = site.Mirrors[0];
+                prepTab.Closeable = false;
+                prepTab.Close += TabClosed;
+                prepTab.CloseTabRequest += PrepTab_SelfCloseRequest;
+                prepTab.NewTabRequest += Tab_NewTabRequest;
+                Tabs.Add(prepTab);
+            }
+            RaisePropertyChanged(nameof(Tabs));
+        }
+
+        private void PrepTab_SelfCloseRequest(object sender, EventArgs e) {
+            Application.Current.Dispatcher.Invoke(() => {
+                CloseTab(SelectedTab);
+            });
+        }
+
+        private void Tab_NewTabRequest(object sender, CustomEventArgs.TabRequestEventArgs e) {
+            Application.Current.Dispatcher.Invoke(() => {
+                var tab = new TabItemModel { Title = "Вкладка тест", Url = e.URL, Closeable = true };
+                tab.Close += TabClosed;
+                Tabs.Add(tab);
+                SelectedTab = tab;
+                RaisePropertyChanged(nameof(Tabs));
+            });
+        }
+
+        private void TabClosed(object sender, System.EventArgs e) {
+            CloseTab((TabItemModel)sender);
+        }
+
+        #endregion
+
+        #region МЕТОДЫ
+
+        /// <summary>
+        /// Метод закрытия указаной вкладки
+        /// </summary>
+        /// <param name="prey">Модель вкладки под закрытие</param>
+        private void CloseTab(TabItemModel prey) {
+            if (Tabs.Count == 1) {
+                App.Current.Shutdown();
+            } else {
+                Tabs.Remove(prey);
+                RaisePropertyChanged(nameof(Tabs));
+
+                Debug.WriteLine(Tabs.Count);
+            }
+        }
+
+        #endregion
     }
 }

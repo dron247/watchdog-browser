@@ -16,7 +16,13 @@
 
 
     <DockPanel LastChildFill="True" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-        <Grid Height="24" VerticalAlignment="Top" HorizontalAlignment="Stretch" DockPanel.Dock="Bottom"/>
+        <Grid Height="24" VerticalAlignment="Top" HorizontalAlignment="Stretch" DockPanel.Dock="Bottom">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="1" Text="{Binding SelectedTab.Url}" Margin="10,0,10,0"/>
+        </Grid>
         <controls:NonReloadingTabControl x:Name="uxTabs" ItemsSource="{Binding Tabs, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding SelectedTab}">
             <TabControl.ItemTemplate>
                 <DataTemplate>
