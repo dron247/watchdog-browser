@@ -12,9 +12,10 @@ using WatchdogBrowser.Models;
 
 namespace WatchdogBrowser.Config {
     public class SitesConfig {
-
+        //Событие вызывается когда конфиг прочитан
         public event EventHandler<ConfigReadyEventArgs> Ready;
 
+        //Доступ к списку сайтов, обычно это не нужно, так как он отдаётся в событии
         public List<SiteModel> Sites {
             get {
                 return sites;
@@ -23,23 +24,30 @@ namespace WatchdogBrowser.Config {
 
         List<SiteModel> sites = new List<SiteModel>();
 
-        string configPath;
+        string configPath;//путь к файлу с настройками
 
         public SitesConfig() {
+            //читаем путь из настроек приложения
             configPath = Properties.Settings.Default.ConfigFilename;
         }
 
-
+        /// <summary>
+        /// Запускает чтение конфига
+        /// </summary>
         public void Initialize() {
             var configText = ReadConfig();
             try {
                 sites = ParseConfig(configText);
                 Ready?.Invoke(this, new ConfigReadyEventArgs(sites));
-            }catch(Exception e) {
+            } catch (Exception e) {
                 throw e;
             }
         }
 
+        /// <summary>
+        /// Считывает текст из файла конфига
+        /// </summary>
+        /// <returns>строку с xml</returns>
         string ReadConfig() {
             if (!File.Exists(configPath)) {
                 return string.Empty;
@@ -49,7 +57,11 @@ namespace WatchdogBrowser.Config {
             }
         }
 
-
+        /// <summary>
+        /// Выполняет разбор строки с xml конфигом
+        /// </summary>
+        /// <param name="xmlString">строка с xml конфигом</param>
+        /// <returns>список с моделями настроек сайтов</returns>
         List<SiteModel> ParseConfig(string xmlString) {
             List<SiteModel> retval = new List<SiteModel>();
             if (xmlString.Equals(string.Empty)) {
@@ -58,6 +70,8 @@ namespace WatchdogBrowser.Config {
                     UpdateInterval = 0,
                     SwitchMirrorTimeout = 0,
                     UpdateTimeout = 0,
+                    Username = string.Empty,
+                    Password = string.Empty,
                     Mirrors = new List<string> { $"http://yandex.ru" },
                     Whitelist = new List<string>()
                 };
@@ -74,6 +88,7 @@ namespace WatchdogBrowser.Config {
                     var xSite = xSites.Elements().First();
                     var siteName = string.Empty;
                     int updateOk = 10, updateFail = 60, updateTimeout = 20;
+                    string username = "", password = "";
                     List<string> mirrors = new List<string>();
                     List<string> whitelist = new List<string>();
 
@@ -114,6 +129,24 @@ namespace WatchdogBrowser.Config {
                             }
                             continue;
                         }
+
+                        if (attr.Name == "username") {
+                            try {
+                                username = attr.Value;
+                            } catch {
+                                username = "";
+                            }
+                            continue;
+                        }
+
+                        if (attr.Name == "password") {
+                            try {
+                                password = attr.Value;
+                            } catch {
+                                password = "";
+                            }
+                            continue;
+                        }
                     }
 
                     var xMirrors = xSite.Descendants("mirrors");
@@ -149,6 +182,8 @@ namespace WatchdogBrowser.Config {
                         UpdateInterval = updateOk,
                         SwitchMirrorTimeout = updateFail,
                         UpdateTimeout = updateTimeout,
+                        Username = username,
+                        Password = password,
                         Mirrors = mirrors,
                         Whitelist = whitelist
                     };
@@ -156,7 +191,7 @@ namespace WatchdogBrowser.Config {
                     retval.Add(siteModel);
 
                 }//end if count > 0
-            }catch(Exception ex) {
+            } catch (Exception ex) {
                 throw new Exception($"Ошибка чтения файла конфигурации: {ex.Message}");
             }
             return retval;

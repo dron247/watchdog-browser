@@ -142,11 +142,13 @@
     </Compile>
     <Compile Include="Controls\NonReloadingTabControl.cs" />
     <Compile Include="CustomEventArgs\ConfigReadyEventArgs.cs" />
+    <Compile Include="CustomEventArgs\StringMessageEventArgs.cs" />
     <Compile Include="CustomEventArgs\TabRequestEventArgs.cs" />
     <Compile Include="Handlers\BrowserProcessHandler.cs" />
     <Compile Include="Handlers\WatchdogBrowserProcessHandler.cs" />
     <Compile Include="Handlers\WatchdogLifespanHandler.cs" />
     <Compile Include="Handlers\WatchdogMenuHandler.cs" />
+    <Compile Include="JSBoundObjects\MonitorJSBound.cs" />
     <Compile Include="Models\SiteModel.cs" />
     <Compile Include="Models\TabItemModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />

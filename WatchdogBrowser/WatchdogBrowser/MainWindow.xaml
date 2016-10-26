@@ -3,8 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:WatchdogBrowser"
-        xmlns:awe="http://schemas.awesomium.com/winfx" 
+        xmlns:local="clr-namespace:WatchdogBrowser" 
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity" 
         xmlns:cmd="http://www.galasoft.ch/mvvmlight"
         xmlns:controls="clr-namespace:WatchdogBrowser.Controls"
@@ -54,11 +53,14 @@
                 <DataTemplate>
                     <Grid>
                         <controls:BrowserTabContent Content="{Binding}"/>
-                        <materialDesign:Card Padding="32" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <materialDesign:Card Visibility="{Binding ReloadingMessageVisibility, Mode=OneWay}" Padding="32" HorizontalAlignment="Center" VerticalAlignment="Center">
                             <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"                     
                              Value="0" Width="64" Height="64"
                              IsIndeterminate="True" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                             
+                        </materialDesign:Card>
+                        <materialDesign:Card Background="Red" Visibility="{Binding LoadErrorVisibility, Mode=OneWay}" Padding="32" HorizontalAlignment="Center" VerticalAlignment="Center" Height="64" Width="256">
+                            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="Ошибка загрузки!" FontSize="32"/>
                         </materialDesign:Card>
                     </Grid>
                 </DataTemplate>

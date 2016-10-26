@@ -12,6 +12,7 @@ using System.Windows;
 using System.Windows.Input;
 using WatchdogBrowser.CustomEventArgs;
 using WatchdogBrowser.Handlers;
+using WatchdogBrowser.JSBoundObjects;
 
 namespace WatchdogBrowser.Models {
     public class TabItemModel : ObservableObject {
@@ -75,18 +76,66 @@ namespace WatchdogBrowser.Models {
             browser?.ShowDevTools();
         }
 
+        private bool reloadingMessageVisible = false;
+
+        public bool ReloadingMessageVisible {
+            get {
+                return reloadingMessageVisible;
+            }
+            set {
+                Set<bool>(nameof(ReloadingMessageVisible), ref reloadingMessageVisible, value);
+                RaisePropertyChanged(nameof(ReloadingMessageVisibility));
+            }
+        }
+
+        public Visibility ReloadingMessageVisibility {
+            get {
+                return ReloadingMessageVisible ? Visibility.Visible : Visibility.Hidden;
+            }
+        }
+
+        private bool loadErrorVisible = false;
+
+        public bool LoadErrorVisible {
+            get {
+                return loadErrorVisible;
+            }
+            set {
+                Set<bool>(nameof(LoadErrorVisible), ref loadErrorVisible, value);
+                RaisePropertyChanged(nameof(LoadErrorVisibility));
+            }
+        }
+
+        public Visibility LoadErrorVisibility {
+            get { return LoadErrorVisible ? Visibility.Visible : Visibility.Hidden; }
+        }
+
 
 
         #region BROWSER
+        
+        private MonitorJSBound jsBinding = null;
+        public MonitorJSBound JsBinding {
+            set {
+                jsBinding = value;
+                Debug.WriteLine(jsBinding.getPassword() == string.Empty ? "PASSWORD EMPTY" : $"PASSWORD={jsBinding.getPassword()}");
+                jsBinding.StatusReport += Bound_StatusReport;
+                jsBinding.UpdateProgress += Bound_UpdateProgress;
+            }
+        }
+
         IWpfWebBrowser browser = null;
         public IWpfWebBrowser WebBrowser {
             get { return browser; }
             set {
                 browser = value;
                 if (browser != null) {
+
                     browser.LoadError += Browser_LoadError;
                     browser.FrameLoadStart += Browser_FrameLoadStart;//начало загрузки
                     browser.FrameLoadEnd += Browser_FrameLoadEnd;//конец загрузки
+                    browser.LoadingStateChanged += Browser_LoadingStateChanged;
+
                     
 
                     browser.MenuHandler = new WatchdogMenuHandler();
@@ -106,29 +155,72 @@ namespace WatchdogBrowser.Models {
                         } catch {
                             //MessageBox.Show("Disposed");
                         }
-                        
+
                     };
                     browser.LifeSpanHandler = lHandler;
                 }
             }
         }
 
+        private void Bound_UpdateProgress(object sender, StringMessageEventArgs e) {
+            //started, completed, failed
+            //throw new NotImplementedException();
+            Debug.WriteLine(e.Message);
+        }
+
+        private void Bound_StatusReport(object sender, StringMessageEventArgs e) {
+            //ok, alert
+            //throw new NotImplementedException();
+            Debug.WriteLine(e.Message);
+        }
+
+        private void Browser_LoadingStateChanged(object sender, LoadingStateChangedEventArgs e) {
+            try {
+                Application.Current.Dispatcher.Invoke(() => {
+                    //ReloadingMessageVisible = e.IsLoading;
+                    Debug.WriteLine($"IsLoading={e.IsLoading}");
+                });
+            } catch { }
+        }
+
         private void Browser_FrameLoadStart(object sender, FrameLoadStartEventArgs e) {
             //throw new NotImplementedException();
-
+            //Debug.WriteLine(e.Url);
         }
 
         private void Browser_FrameLoadEnd(object sender, FrameLoadEndEventArgs e) {
             //throw new NotImplementedException();
+
+            try {
+                Application.Current.Dispatcher.Invoke(() => {
+                    if (ReloadingMessageVisible) {
+                        ReloadingMessageVisible = false;
+                    }
+
+                    if (LoadErrorVisible && e.HttpStatusCode == 200 && e.Browser.HasDocument) {
+                        LoadErrorVisible = false;
+                    }
+                    Debug.WriteLine(e.HttpStatusCode);
+                });
+            } catch { }
         }
 
         private void Browser_LoadError(object sender, CefSharp.LoadErrorEventArgs e) {
             //MessageBox.Show($"Ошибка загрузки страницыю код: {e.ErrorCode}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             //TODO: Логика умного апдейта
-            var b = (IWpfWebBrowser)sender;
-            b.Reload();
-            
+
+            try {
+                Application.Current.Dispatcher.Invoke(() => {
+                    HandleLoadError((IWpfWebBrowser)sender);
+                });
+            } catch { }
+
             Debug.WriteLine($"Перезагрузка после {e.ErrorCode}; РЕАЛИЗУЙ УМНУЮ ПЕРЕЗАГРУЗКУ", "LOAD LIFECYCLE");
+        }
+
+        private void HandleLoadError(IWpfWebBrowser browser) {
+            browser.Reload();
+            LoadErrorVisible = true;
         }
 
 
