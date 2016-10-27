@@ -7,13 +7,13 @@ using System.Windows;
 // Управление общими сведениями о сборке осуществляется с помощью 
 // набора атрибутов. Измените значения этих атрибутов, чтобы изменить сведения,
 // связанные со сборкой.
-[assembly: AssemblyTitle("WatchdogBrowser")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Кобра Гарант монитор")]
+[assembly: AssemblyDescription("Специальный браузер для взаимодействия с ИС Кобра Гарант")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("WatchdogBrowser")]
+[assembly: AssemblyCompany("Кобра Гарант")]
+[assembly: AssemblyProduct("Кобра Гарант монитор")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyTrademark("Кобра Гарант")]
 [assembly: AssemblyCulture("")]
 
 // Параметр ComVisible со значением FALSE делает типы в сборке невидимыми 

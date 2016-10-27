@@ -77,6 +77,9 @@ namespace WatchdogBrowser.ViewModel {
 
             var prepTabs = new List<TabItemModel>();
             foreach (var site in sitesList) {
+                Credntials.CredentialsManager.DefaultInstance.Username = site.Username;
+                Credntials.CredentialsManager.DefaultInstance.Password = site.Password;
+
                 var prepTab = new TabItemModel();
                 prepTab.Title = site.Name;
                 prepTab.Url = site.Mirrors[0];

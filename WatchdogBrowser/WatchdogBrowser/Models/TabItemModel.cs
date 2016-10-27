@@ -113,15 +113,32 @@ namespace WatchdogBrowser.Models {
 
 
         #region BROWSER
-        
+
         private MonitorJSBound jsBinding = null;
         public MonitorJSBound JsBinding {
             set {
                 jsBinding = value;
-                Debug.WriteLine(jsBinding.getPassword() == string.Empty ? "PASSWORD EMPTY" : $"PASSWORD={jsBinding.getPassword()}");
-                jsBinding.StatusReport += Bound_StatusReport;
-                jsBinding.UpdateProgress += Bound_UpdateProgress;
+                jsBinding.Heartbeat += JsBinding_Heartbeat;
+                jsBinding.CloseTab += JsBinding_CloseTab;
             }
+        }
+
+        private void JsBinding_CloseTab(object sender, StringMessageEventArgs e) {
+            Debug.WriteLine($"*************");
+            Debug.WriteLine($"* Tab Close *");
+            Debug.WriteLine($"*************");
+        }
+
+        private void JsBinding_Heartbeat(object sender, EventArgs e) {
+
+            try {
+                Application.Current.Dispatcher.Invoke(() => {
+                    Debug.WriteLine($"HEARTBEAT");
+                    if (LoadErrorVisible) {
+                        LoadErrorVisible = false;
+                    }
+                });
+            } catch { }
         }
 
         IWpfWebBrowser browser = null;
@@ -136,7 +153,7 @@ namespace WatchdogBrowser.Models {
                     browser.FrameLoadEnd += Browser_FrameLoadEnd;//конец загрузки
                     browser.LoadingStateChanged += Browser_LoadingStateChanged;
 
-                    
+
 
                     browser.MenuHandler = new WatchdogMenuHandler();
                     var lHandler = new WatchdogLifespanHandler();
@@ -162,25 +179,13 @@ namespace WatchdogBrowser.Models {
             }
         }
 
-        private void Bound_UpdateProgress(object sender, StringMessageEventArgs e) {
-            //started, completed, failed
-            //throw new NotImplementedException();
-            Debug.WriteLine(e.Message);
-        }
-
-        private void Bound_StatusReport(object sender, StringMessageEventArgs e) {
-            //ok, alert
-            //throw new NotImplementedException();
-            Debug.WriteLine(e.Message);
-        }
-
         private void Browser_LoadingStateChanged(object sender, LoadingStateChangedEventArgs e) {
-            try {
-                Application.Current.Dispatcher.Invoke(() => {
-                    //ReloadingMessageVisible = e.IsLoading;
-                    Debug.WriteLine($"IsLoading={e.IsLoading}");
-                });
-            } catch { }
+            //try {
+            //    Application.Current.Dispatcher.Invoke(() => {
+            //        //ReloadingMessageVisible = e.IsLoading;
+            //        //Debug.WriteLine($"IsLoading={e.IsLoading}");
+            //    });
+            //} catch { }
         }
 
         private void Browser_FrameLoadStart(object sender, FrameLoadStartEventArgs e) {
@@ -197,9 +202,6 @@ namespace WatchdogBrowser.Models {
                         ReloadingMessageVisible = false;
                     }
 
-                    if (LoadErrorVisible && e.HttpStatusCode == 200 && e.Browser.HasDocument) {
-                        LoadErrorVisible = false;
-                    }
                     Debug.WriteLine(e.HttpStatusCode);
                 });
             } catch { }
@@ -219,8 +221,11 @@ namespace WatchdogBrowser.Models {
         }
 
         private void HandleLoadError(IWpfWebBrowser browser) {
-            browser.Reload();
-            LoadErrorVisible = true;
+            var tsk = Task.Run(async () => {
+                await Task.Delay(3000);
+                browser.Reload();
+                LoadErrorVisible = true;
+            });
         }
 
 

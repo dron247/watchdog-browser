@@ -27,25 +27,22 @@ namespace WatchdogBrowser.Controls {
         MonitorJSBound bound = null;
         public BrowserTabContent() {
             InitializeComponent();
-            var bound = new MonitorJSBound();
-            bound.StatusReport += Bound_StatusReport;
-            bound.UpdateProgress += Bound_UpdateProgress;
+            var crd = Credntials.CredentialsManager.DefaultInstance;
+            bound = new MonitorJSBound(crd.Username, crd.Password);            
             browser.RegisterJsObject("cobraMonitor", bound);
-
         }
 
-        private void Bound_UpdateProgress(object sender, CustomEventArgs.StringMessageEventArgs e) {
-            Debug.WriteLine(e.Message);
-        }
+        
 
-        private void Bound_StatusReport(object sender, CustomEventArgs.StringMessageEventArgs e) {
-            Debug.WriteLine(e.Message);
+        
+
+        private void UserControl_Loaded(object sender, RoutedEventArgs e) {
+            var model = (TabItemModel) DataContext;
+            model.JsBinding = bound;
         }
 
         private void UserControl_Unloaded(object sender, RoutedEventArgs e) {
             //browser?.GetFocusedFrame().Dispose();
         }
-
-
     }
 }

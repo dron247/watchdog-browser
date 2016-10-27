@@ -57,10 +57,9 @@
                             <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"                     
                              Value="0" Width="64" Height="64"
                              IsIndeterminate="True" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                            
                         </materialDesign:Card>
-                        <materialDesign:Card Background="Red" Visibility="{Binding LoadErrorVisibility, Mode=OneWay}" Padding="32" HorizontalAlignment="Center" VerticalAlignment="Center" Height="64" Width="256">
-                            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="Ошибка загрузки!" FontSize="32"/>
+                        <materialDesign:Card Background="Red" Visibility="{Binding LoadErrorVisibility, Mode=OneWay}" Padding="32" HorizontalAlignment="Center" VerticalAlignment="Center" Height="320" Width="480">
+                            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="Ошибка загрузки!" FontSize="46" Foreground="White"/>
                         </materialDesign:Card>
                     </Grid>
                 </DataTemplate>

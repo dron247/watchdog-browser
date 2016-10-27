@@ -141,6 +141,7 @@
       <DependentUpon>BrowserTabContent.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\NonReloadingTabControl.cs" />
+    <Compile Include="Credntials\CredentialsManager.cs" />
     <Compile Include="CustomEventArgs\ConfigReadyEventArgs.cs" />
     <Compile Include="CustomEventArgs\StringMessageEventArgs.cs" />
     <Compile Include="CustomEventArgs\TabRequestEventArgs.cs" />

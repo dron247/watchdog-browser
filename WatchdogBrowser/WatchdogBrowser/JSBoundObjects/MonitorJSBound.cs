@@ -22,17 +22,18 @@ namespace WatchdogBrowser.JSBoundObjects {
             return Password;
         }
 
-        public void setStatus(string status) {
+        public void heartbeat() {
             //ok, alert
-            StatusReport?.Invoke(this, new StringMessageEventArgs { Message = status });
+            Heartbeat?.Invoke(this, EventArgs.Empty);
         }
 
-        public void reportUpdateProgress(string progress) {
-            //started, completed, failed
-            UpdateProgress?.Invoke(this, new StringMessageEventArgs { Message = progress });
+        public void closeTab(string url) {
+            CloseTab?.Invoke(this, new StringMessageEventArgs { Message = url });
         }
 
-        public event EventHandler<StringMessageEventArgs> StatusReport;
-        public event EventHandler<StringMessageEventArgs> UpdateProgress;
+
+
+        public event EventHandler Heartbeat;
+        public event EventHandler<StringMessageEventArgs> CloseTab;
     }
 }
