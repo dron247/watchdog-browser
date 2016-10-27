@@ -120,13 +120,20 @@ namespace WatchdogBrowser.Models {
                 jsBinding = value;
                 jsBinding.Heartbeat += JsBinding_Heartbeat;
                 jsBinding.CloseTab += JsBinding_CloseTab;
+                jsBinding.AlarmStateUpdated += JsBinding_AlarmStateUpdated;
             }
         }
 
+        string lastCode = string.Empty;
+        private void JsBinding_AlarmStateUpdated(object sender, StringMessageEventArgs e) {
+            if (e.Message == lastCode) return;
+            var color = e.Message == "1" ? "красный" : "зелёный";
+            MessageBox.Show($"Получено значение: {e.Message}, код {color}");
+            lastCode = e.Message;
+        }
+
         private void JsBinding_CloseTab(object sender, StringMessageEventArgs e) {
-            Debug.WriteLine($"*************");
-            Debug.WriteLine($"* Tab Close *");
-            Debug.WriteLine($"*************");
+            MessageBox.Show($"Закрыть эту вкладку! {e.Message}");
         }
 
         private void JsBinding_Heartbeat(object sender, EventArgs e) {

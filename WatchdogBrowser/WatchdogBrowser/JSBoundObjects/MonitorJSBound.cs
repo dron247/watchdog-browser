@@ -31,9 +31,14 @@ namespace WatchdogBrowser.JSBoundObjects {
             CloseTab?.Invoke(this, new StringMessageEventArgs { Message = url });
         }
 
+        public void setAlarm(string code) {
+            AlarmStateUpdated?.Invoke(this, new StringMessageEventArgs { Message = code });
+        }
+
 
 
         public event EventHandler Heartbeat;
         public event EventHandler<StringMessageEventArgs> CloseTab;
+        public event EventHandler<StringMessageEventArgs> AlarmStateUpdated;
     }
 }
