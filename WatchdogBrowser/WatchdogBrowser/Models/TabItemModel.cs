@@ -32,6 +32,7 @@ namespace WatchdogBrowser.Models {
         string url = "#";
         bool closeable = false;
         int alertStatus = -1;
+        int activeMirror = 0;
 
         /// <summary>
         /// Заголовок вкладки
@@ -56,6 +57,11 @@ namespace WatchdogBrowser.Models {
                 Set<string>(nameof(this.Url), ref url, value);
             }
         }
+
+        /// <summary>
+        /// Список зеркал сайта
+        /// </summary>
+        public List<string> Mirrors { get; set; }
 
         /// <summary>
         /// Можно ли закрыть вкладку
@@ -156,8 +162,9 @@ namespace WatchdogBrowser.Models {
         public ICommand SwitchMirrorCommand { get; private set; }
 
         private void SwitchMirrorMethod() {
-            MessageBox.Show("Switch mirror");
+            SwitchMirror();
         }
+
 
 
         public ICommand CloseTabCommand { get; private set; }
@@ -326,6 +333,15 @@ namespace WatchdogBrowser.Models {
 
         public void DisposeTab() {
             WebBrowser?.Dispose();
+        }
+
+        private void SwitchMirror() {
+            if (Mirrors.Count == 0) return;
+            activeMirror++;
+            if (activeMirror > Mirrors.Count - 1) {
+                activeMirror = 0;
+            }
+            Url = Mirrors[activeMirror];
         }
     }
 }

@@ -85,6 +85,7 @@ namespace WatchdogBrowser.ViewModel {
                 var prepTab = new TabItemModel();
                 prepTab.Title = site.Name;
                 prepTab.Url = site.Mirrors[0];
+                prepTab.Mirrors = site.Mirrors;
                 prepTab.Closeable = !site.Watched;
                 prepTab.Watched = site.Watched;
                 prepTab.Close += TabClosed;
@@ -93,6 +94,7 @@ namespace WatchdogBrowser.ViewModel {
                 Tabs.Add(prepTab);
             }
             RaisePropertyChanged(nameof(Tabs));
+            SelectedTab = Tabs[0];
         }
 
         private void PrepTab_SelfCloseRequest(object sender, EventArgs e) {

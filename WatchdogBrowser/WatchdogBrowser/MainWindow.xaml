@@ -44,10 +44,10 @@
                         <TextBlock Grid.Column="1" Margin="10, 3, 16, 3" VerticalAlignment="Center">
                             <Run Text="{Binding Title, Mode=OneWay}" Foreground="{Binding AlertColor, Mode=OneWay}"/>
                         </TextBlock>
-                        <Button VerticalAlignment="Center" Margin="3,0,3,0" Grid.Column="2" HorizontalAlignment="Right" Command="{Binding SwitchMirrorCommand}" Visibility="{Binding SwitchMirrorVisibility,Mode=OneTime}" IsEnabled="{Binding Watched}" ToolTip="Сменить сервер">
+                        <Button VerticalAlignment="Center" Margin="3,0,3,0" Grid.Column="2" HorizontalAlignment="Right" Command="{Binding SwitchMirrorCommand}" Visibility="{Binding SwitchMirrorVisibility,Mode=OneTime}" IsEnabled="{Binding Watched, Mode=OneWay}" ToolTip="Сменить сервер">
                             <materialDesign:PackIcon Grid.Column="0" Height="20" Width="20" VerticalAlignment="Center" Kind="SwapHorizontal"/>
                         </Button>
-                        <Button VerticalAlignment="Center" Grid.Column="3" HorizontalAlignment="Right" Command="{Binding CloseTabCommand}" Visibility="{Binding CloseButtonVisibility}" IsEnabled="{Binding Closeable}">
+                        <Button VerticalAlignment="Center" Grid.Column="3" HorizontalAlignment="Right" Command="{Binding CloseTabCommand}" Visibility="{Binding CloseButtonVisibility, Mode=OneWay}" IsEnabled="{Binding Closeable, Mode=OneWay}">
                             <TextBlock Foreground="White" Margin="3,0" FontWeight="Bold">ЗАКРЫТЬ</TextBlock>
                         </Button>
                     </Grid>
