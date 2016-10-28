@@ -85,7 +85,8 @@ namespace WatchdogBrowser.ViewModel {
                 var prepTab = new TabItemModel();
                 prepTab.Title = site.Name;
                 prepTab.Url = site.Mirrors[0];
-                prepTab.Closeable = false;
+                prepTab.Closeable = !site.Watched;
+                prepTab.Watched = site.Watched;
                 prepTab.Close += TabClosed;
                 prepTab.CloseTabRequest += PrepTab_SelfCloseRequest;
                 prepTab.NewTabRequest += Tab_NewTabRequest;

@@ -12,6 +12,7 @@ namespace WatchdogBrowser.Models {
         public int UpdateTimeout { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
+        public bool Watched { get; set; }
 
         public List<string> Mirrors { get; set; }
 

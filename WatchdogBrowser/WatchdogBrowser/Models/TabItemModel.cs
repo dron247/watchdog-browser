@@ -20,6 +20,7 @@ namespace WatchdogBrowser.Models {
         public TabItemModel() {
             CloseTabCommand = new RelayCommand(CloseMethod);
             ShowDevtoolsCommand = new RelayCommand(ShowDevtoolsMethod);
+            SwitchMirrorCommand = new RelayCommand(SwitchMirrorMethod);
         }
 
 
@@ -32,6 +33,9 @@ namespace WatchdogBrowser.Models {
         bool closeable = false;
         int alertStatus = -1;
 
+        /// <summary>
+        /// Заголовок вкладки
+        /// </summary>
         public string Title {
             get {
                 return title;
@@ -41,6 +45,9 @@ namespace WatchdogBrowser.Models {
             }
         }
 
+        /// <summary>
+        /// Текущий адрес вкладки
+        /// </summary>
         public string Url {
             get {
                 return url;
@@ -50,6 +57,9 @@ namespace WatchdogBrowser.Models {
             }
         }
 
+        /// <summary>
+        /// Можно ли закрыть вкладку
+        /// </summary>
         public bool Closeable {
             get {
                 return closeable;
@@ -59,6 +69,17 @@ namespace WatchdogBrowser.Models {
             }
         }
 
+        /// <summary>
+        /// Наблюдается ли вкладка системой мёртвой руки
+        /// </summary>
+        public bool Watched {
+            get;set;
+        }
+
+
+        /// <summary>
+        /// Видно ли кнопку закрытия вкладки, только для интерфейса
+        /// </summary>
         public Visibility CloseButtonVisibility {
             get {
                 return Closeable ? Visibility.Visible : Visibility.Collapsed;
@@ -68,6 +89,9 @@ namespace WatchdogBrowser.Models {
         static readonly SolidColorBrush greenBrush = new SolidColorBrush(Colors.Green);
         static readonly SolidColorBrush redBrush = new SolidColorBrush(Colors.Red);
         static readonly SolidColorBrush blackBrush = new SolidColorBrush(Colors.Black);
+        /// <summary>
+        /// Цвет индикатора статуса, только дял интерфейса
+        /// </summary>
         public SolidColorBrush AlertColor {
             get {
                 if (alertStatus < 0) {
@@ -77,30 +101,18 @@ namespace WatchdogBrowser.Models {
             }
         }
 
+
+        public Visibility SwitchMirrorVisibility {
+            get {
+                return Watched ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
         
-
-        public ICommand CloseTabCommand { get; private set; }
-
-        /// <summary>
-        /// Вызывает закрытие текущей вкладки
-        /// </summary>
-        void CloseMethod(string url) {
-            Close?.Invoke(this, new StringMessageEventArgs { Message = url });
-        }
-
-        void CloseMethod() {
-            Close?.Invoke(this, new StringMessageEventArgs { Message = string.Empty });
-        }
-
-
-        public ICommand ShowDevtoolsCommand { get; private set; }
-
-        void ShowDevtoolsMethod() {
-            browser?.ShowDevTools();
-        }
-
         private bool reloadingMessageVisible = false;
-
+        /// <summary>
+        /// Открыто ли сообщение о загрузке страницы
+        /// </summary>
         public bool ReloadingMessageVisible {
             get {
                 return reloadingMessageVisible;
@@ -110,7 +122,9 @@ namespace WatchdogBrowser.Models {
                 RaisePropertyChanged(nameof(ReloadingMessageVisibility));
             }
         }
-
+        /// <summary>
+        /// Открыто ли сообщение о загрузке страницы, только для интерфейса
+        /// </summary>
         public Visibility ReloadingMessageVisibility {
             get {
                 return ReloadingMessageVisible ? Visibility.Visible : Visibility.Hidden;
@@ -118,7 +132,9 @@ namespace WatchdogBrowser.Models {
         }
 
         private bool loadErrorVisible = false;
-
+        /// <summary>
+        /// Видно ли сообщение об ошибке загрузки
+        /// </summary>
         public bool LoadErrorVisible {
             get {
                 return loadErrorVisible;
@@ -128,12 +144,49 @@ namespace WatchdogBrowser.Models {
                 RaisePropertyChanged(nameof(LoadErrorVisibility));
             }
         }
-
+        /// <summary>
+        /// Видно ли сообщение об ошибке загрузки, только для интерфейса
+        /// </summary>
         public Visibility LoadErrorVisibility {
             get { return LoadErrorVisible ? Visibility.Visible : Visibility.Hidden; }
         }
 
 
+        #region COMMANDS
+        public ICommand SwitchMirrorCommand { get; private set; }
+
+        private void SwitchMirrorMethod() {
+            MessageBox.Show("Switch mirror");
+        }
+
+
+        public ICommand CloseTabCommand { get; private set; }
+
+        /// <summary>
+        /// Вызывает закрытие текущей вкладки с проверкой адреса
+        /// </summary>
+        /// <param name="url">адрес для проверки</param>
+        void CloseMethod(string url) {
+            Close?.Invoke(this, new StringMessageEventArgs { Message = url });
+        }
+
+        /// <summary>
+        /// Вызывает закрытие текущей вкладки, случай с нажатием кнопки
+        /// </summary>
+        void CloseMethod() {
+            Close?.Invoke(this, new StringMessageEventArgs { Message = string.Empty });
+        }
+
+
+        public ICommand ShowDevtoolsCommand { get; private set; }
+        /// <summary>
+        /// Открывает инструменты разработчика
+        /// </summary>
+        void ShowDevtoolsMethod() {
+            browser?.ShowDevTools();
+        }
+
+        #endregion
 
         #region BROWSER
 
