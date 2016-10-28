@@ -3,8 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Windows;
 using WatchdogBrowser.Config;
+using WatchdogBrowser.CustomEventArgs;
 using WatchdogBrowser.Models;
 
 namespace WatchdogBrowser.ViewModel {
@@ -110,8 +112,20 @@ namespace WatchdogBrowser.ViewModel {
             });
         }
 
-        private void TabClosed(object sender, System.EventArgs e) {
-            CloseTab((TabItemModel)sender);
+        private void TabClosed(object sender, StringMessageEventArgs e) {
+            //find tab
+            if (e.Message != string.Empty) {
+                var tab = Tabs.Where((x) => x.Url.Contains(e.Message)).First();
+                if (tab != null) {
+                    tab.DisposeTab();
+                    CloseTab(tab);
+                    Debug.WriteLine("_____________CLOSE BY URL_________");
+                }
+            } else {
+                var prey = (TabItemModel)sender;
+                prey.DisposeTab();
+                CloseTab(prey);
+            }
         }
 
         #endregion

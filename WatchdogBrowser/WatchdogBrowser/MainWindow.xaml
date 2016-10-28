@@ -39,7 +39,7 @@
                             <ColumnDefinition Width="auto"/>
                             <ColumnDefinition Width="auto"/>
                         </Grid.ColumnDefinitions>
-                        <materialDesign:PackIcon Grid.Column="0" Height="20" Width="20" VerticalAlignment="Center" Kind="Airplay"/>
+                        <materialDesign:PackIcon Grid.Column="0" Height="20" Width="20" VerticalAlignment="Center" Kind="Airplay" Foreground="{Binding AlertColor, Mode=OneWay}"/>
                         <TextBlock Grid.Column="1" Margin="10, 3, 16, 3" VerticalAlignment="Center">
                             <Run Text="{Binding Title, Mode=OneWay}"/>
                         </TextBlock>

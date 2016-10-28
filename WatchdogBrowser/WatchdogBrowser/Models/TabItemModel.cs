@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using WatchdogBrowser.CustomEventArgs;
 using WatchdogBrowser.Handlers;
 using WatchdogBrowser.JSBoundObjects;
@@ -22,13 +23,14 @@ namespace WatchdogBrowser.Models {
         }
 
 
-        public event EventHandler Close;
+        public event EventHandler<StringMessageEventArgs> Close;
         public event EventHandler<TabRequestEventArgs> NewTabRequest;
         public event EventHandler CloseTabRequest;
 
         string title = "Без имени";
         string url = "#";
         bool closeable = false;
+        int alertStatus = -1;
 
         public string Title {
             get {
@@ -63,10 +65,31 @@ namespace WatchdogBrowser.Models {
             }
         }
 
+        static readonly SolidColorBrush greenBrush = new SolidColorBrush(Colors.Green);
+        static readonly SolidColorBrush redBrush = new SolidColorBrush(Colors.Red);
+        static readonly SolidColorBrush blackBrush = new SolidColorBrush(Colors.Black);
+        public SolidColorBrush AlertColor {
+            get {
+                if (alertStatus < 0) {
+                    return blackBrush;
+                }
+                return alertStatus == 0 ? greenBrush : redBrush;
+            }
+        }
+
+        
+
         public ICommand CloseTabCommand { get; private set; }
 
+        /// <summary>
+        /// Вызывает закрытие текущей вкладки
+        /// </summary>
+        void CloseMethod(string url) {
+            Close?.Invoke(this, new StringMessageEventArgs { Message = url });
+        }
+
         void CloseMethod() {
-            Close?.Invoke(this, EventArgs.Empty);
+            Close?.Invoke(this, new StringMessageEventArgs { Message = string.Empty });
         }
 
 
@@ -124,23 +147,28 @@ namespace WatchdogBrowser.Models {
             }
         }
 
-        string lastCode = string.Empty;
+
+        //Обработчик сообщения о состоянии тревоги на объекте
         private void JsBinding_AlarmStateUpdated(object sender, StringMessageEventArgs e) {
-            if (e.Message == lastCode) return;
-            var color = e.Message == "1" ? "красный" : "зелёный";
-            MessageBox.Show($"Получено значение: {e.Message}, код {color}");
-            lastCode = e.Message;
+            alertStatus = e.Message == "0" ? 0 : 1;
+            RaisePropertyChanged(nameof(AlertColor));
         }
 
+        //Обработчик сообщения со страницы о необходимости закрыть текущую вкладку
         private void JsBinding_CloseTab(object sender, StringMessageEventArgs e) {
-            MessageBox.Show($"Закрыть эту вкладку! {e.Message}");
+            try {
+                Application.Current.Dispatcher.Invoke(() => {
+                    CloseMethod(e.Message);
+                });
+            } catch { }
         }
 
+        //Обработчик сообщения о том, что страница жива, если сообщения нет, то нужно принять меры
         private void JsBinding_Heartbeat(object sender, EventArgs e) {
 
             try {
                 Application.Current.Dispatcher.Invoke(() => {
-                    Debug.WriteLine($"HEARTBEAT");
+                    //Debug.WriteLine($"HEARTBEAT");
                     if (LoadErrorVisible) {
                         LoadErrorVisible = false;
                     }
@@ -168,17 +196,17 @@ namespace WatchdogBrowser.Models {
                         NewTabRequest?.Invoke(this, e);
                     };
                     lHandler.CloseTabRequest += (s, e) => {
-                        var brwsr = (IBrowser)s;
-                        try {
-                            //Так как обработка идёт из потока, плюс ко всему от биндинга неродного контрола, tst нужны чтобы вызвать exception
-                            //он вызывается если был открыт попап типа девтулзов, если всё норм, значит вкладка
-                            //да, костыль, но не критичный
-                            if (!brwsr.IsPopup) {
-                                CloseTabRequest?.Invoke(this, e);
-                            }
-                        } catch {
-                            //MessageBox.Show("Disposed");
-                        }
+                        //var brwsr = (IBrowser)s;
+                        //try {
+                        //    //Так как обработка идёт из потока, плюс ко всему от биндинга неродного контрола, tst нужны чтобы вызвать exception
+                        //    //он вызывается если был открыт попап типа девтулзов, если всё норм, значит вкладка
+                        //    //да, костыль, но не критичный
+                        //    if (!brwsr.IsPopup) {
+                        //        CloseTabRequest?.Invoke(this, e);
+                        //    }
+                        //} catch {
+                        //    //MessageBox.Show("Disposed");
+                        //}
 
                     };
                     browser.LifeSpanHandler = lHandler;
@@ -186,34 +214,28 @@ namespace WatchdogBrowser.Models {
             }
         }
 
+        //Обработчик события состояния загрузки документа, не используется, нет смысла
         private void Browser_LoadingStateChanged(object sender, LoadingStateChangedEventArgs e) {
+            //
+        }
+
+        //Обработчик события начала загрузки, не используется из-за бага в CEF
+        private void Browser_FrameLoadStart(object sender, FrameLoadStartEventArgs e) {
+            //
+        }
+
+        //Обработчик события конца загрузки документа
+        private void Browser_FrameLoadEnd(object sender, FrameLoadEndEventArgs e) {
             //try {
             //    Application.Current.Dispatcher.Invoke(() => {
-            //        //ReloadingMessageVisible = e.IsLoading;
-            //        //Debug.WriteLine($"IsLoading={e.IsLoading}");
+            //        if (ReloadingMessageVisible) {
+            //            ReloadingMessageVisible = false;
+            //        }
             //    });
             //} catch { }
         }
 
-        private void Browser_FrameLoadStart(object sender, FrameLoadStartEventArgs e) {
-            //throw new NotImplementedException();
-            //Debug.WriteLine(e.Url);
-        }
-
-        private void Browser_FrameLoadEnd(object sender, FrameLoadEndEventArgs e) {
-            //throw new NotImplementedException();
-
-            try {
-                Application.Current.Dispatcher.Invoke(() => {
-                    if (ReloadingMessageVisible) {
-                        ReloadingMessageVisible = false;
-                    }
-
-                    Debug.WriteLine(e.HttpStatusCode);
-                });
-            } catch { }
-        }
-
+        //Обработчик события ошибки загрузки документа
         private void Browser_LoadError(object sender, CefSharp.LoadErrorEventArgs e) {
             //MessageBox.Show($"Ошибка загрузки страницыю код: {e.ErrorCode}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             //TODO: Логика умного апдейта
@@ -227,11 +249,15 @@ namespace WatchdogBrowser.Models {
             Debug.WriteLine($"Перезагрузка после {e.ErrorCode}; РЕАЛИЗУЙ УМНУЮ ПЕРЕЗАГРУЗКУ", "LOAD LIFECYCLE");
         }
 
+        /// <summary>
+        /// Метод обработки ошибки страницы
+        /// </summary>
+        /// <param name="browser">ссылка на компонент браузера</param>
         private void HandleLoadError(IWpfWebBrowser browser) {
             var tsk = Task.Run(async () => {
-                await Task.Delay(3000);
-                browser.Reload();
-                LoadErrorVisible = true;
+                await Task.Delay(3000);//задержка перезагрузки, чтобы снизить нагрузку на систему, реально можно BSOD поймать
+                LoadErrorVisible = true;//показываем страшное сообщение об ошибке
+                browser.Reload();//перезагружаем страницу
             });
         }
 
@@ -244,5 +270,9 @@ namespace WatchdogBrowser.Models {
 
 
         #endregion
+
+        public void DisposeTab() {
+            WebBrowser?.Dispose();
+        }
     }
 }
