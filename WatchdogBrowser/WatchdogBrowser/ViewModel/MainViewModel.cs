@@ -88,6 +88,9 @@ namespace WatchdogBrowser.ViewModel {
                 prepTab.Mirrors = site.Mirrors;
                 prepTab.Closeable = !site.Watched;
                 prepTab.Watched = site.Watched;
+                prepTab.HeartbeatTimeout = site.UpdateInterval;
+                prepTab.PageLoadTimeout = site.UpdateTimeout;
+                prepTab.SwitchMirrorTimeout = site.SwitchMirrorTimeout;
                 prepTab.Close += TabClosed;
                 prepTab.CloseTabRequest += PrepTab_SelfCloseRequest;
                 prepTab.NewTabRequest += Tab_NewTabRequest;

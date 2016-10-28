@@ -57,12 +57,12 @@
                 <DataTemplate>
                     <Grid>
                         <controls:BrowserTabContent Content="{Binding}"/>
-                        <materialDesign:Card Visibility="{Binding ReloadingMessageVisibility, Mode=OneWay}" Padding="32" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <materialDesign:Card Panel.ZIndex="1001" Visibility="{Binding ReloadingMessageVisibility, Mode=OneWay}" Padding="32" HorizontalAlignment="Center" VerticalAlignment="Center">
                             <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"                     
                              Value="0" Width="64" Height="64"
                              IsIndeterminate="True" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                         </materialDesign:Card>
-                        <materialDesign:Card Background="Red" Visibility="{Binding LoadErrorVisibility, Mode=OneWay}" Padding="32" HorizontalAlignment="Center" VerticalAlignment="Center" Height="320" Width="480">
+                        <materialDesign:Card Panel.ZIndex="1000" Background="Red" Visibility="{Binding LoadErrorVisibility, Mode=OneWay}" Padding="32" HorizontalAlignment="Center" VerticalAlignment="Center" Height="320" Width="480">
                             <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="Ошибка загрузки!" FontSize="46" Foreground="White"/>
                         </materialDesign:Card>
                     </Grid>

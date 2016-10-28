@@ -105,7 +105,7 @@ namespace WatchdogBrowser.Config {
                             continue;
                         }
 
-                        if (attr.Name == "updateOk") {
+                        if (attr.Name == "heartbeatTimeout") {
                             try {
                                 updateOk = int.Parse(attr.Value);
                             } catch {
@@ -114,7 +114,7 @@ namespace WatchdogBrowser.Config {
                             continue;
                         }
 
-                        if (attr.Name == "updateFail") {
+                        if (attr.Name == "mirrorTimeout") {
                             try {
                                 updateFail = int.Parse(attr.Value);
                             } catch {
@@ -123,7 +123,7 @@ namespace WatchdogBrowser.Config {
                             continue;
                         }
 
-                        if (attr.Name == "updateTimeout") {
+                        if (attr.Name == "pageLoadTimeout") {
                             try {
                                 updateTimeout = int.Parse(attr.Value);
                             } catch {

@@ -8,12 +8,14 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using WatchdogBrowser.CustomEventArgs;
 using WatchdogBrowser.Handlers;
 using WatchdogBrowser.JSBoundObjects;
+using WatchdogBrowser.Workers;
 
 namespace WatchdogBrowser.Models {
     public class TabItemModel : ObservableObject {
@@ -27,6 +29,10 @@ namespace WatchdogBrowser.Models {
         public event EventHandler<StringMessageEventArgs> Close;
         public event EventHandler<TabRequestEventArgs> NewTabRequest;
         public event EventHandler CloseTabRequest;
+
+        Watchdog watchdog = new Watchdog();
+        bool pageLoadFinished = false;
+
 
         string title = "Без имени";
         string url = "#";
@@ -55,7 +61,28 @@ namespace WatchdogBrowser.Models {
             }
             set {
                 Set<string>(nameof(this.Url), ref url, value);
+                if (Watched && !timerActive) {
+                    timerActive = true;
+                    pageLoadFinished = false;
+                    var timer = new Timer();
+                    timer.Interval = PageLoadTimeout * 1000;
+                    timer.AutoReset = false;
+                    timer.Elapsed += Timer_Elapsed;
+                    timer.Start();
+                }
             }
+        }
+
+        bool timerActive = false;
+        private void Timer_Elapsed(object sender, ElapsedEventArgs e) {
+            Application.Current.Dispatcher.Invoke(() => {
+                if (!pageLoadFinished) {
+                    SwitchMirror();
+                }
+            });
+            (sender as Timer).Stop();
+            timerActive = false;
+            (sender as Timer).Dispose();
         }
 
         /// <summary>
@@ -79,7 +106,7 @@ namespace WatchdogBrowser.Models {
         /// Наблюдается ли вкладка системой мёртвой руки
         /// </summary>
         public bool Watched {
-            get;set;
+            get; set;
         }
 
 
@@ -114,7 +141,7 @@ namespace WatchdogBrowser.Models {
             }
         }
 
-        
+
         private bool reloadingMessageVisible = false;
         /// <summary>
         /// Открыто ли сообщение о загрузке страницы
@@ -156,6 +183,24 @@ namespace WatchdogBrowser.Models {
         public Visibility LoadErrorVisibility {
             get { return LoadErrorVisible ? Visibility.Visible : Visibility.Hidden; }
         }
+
+
+        /// <summary>
+        /// Интервал, в котором ожидется heartbeat
+        /// </summary>
+        public int HeartbeatTimeout { get; set; }
+
+
+        /// <summary>
+        /// Таймаут heartbeat, необходима перезагрузка страницы
+        /// </summary>
+        public int PageLoadTimeout { get; set; }
+
+
+        /// <summary>
+        /// Таймаут heartbeat по зеркалу, необходима смена зеркала
+        /// </summary>
+        public int SwitchMirrorTimeout { get; set; }
 
 
         #region COMMANDS
@@ -223,8 +268,17 @@ namespace WatchdogBrowser.Models {
             } catch { }
         }
 
+        bool isIgnitionHeartbeat = true;
         //Обработчик сообщения о том, что страница жива, если сообщения нет, то нужно принять меры
         private void JsBinding_Heartbeat(object sender, EventArgs e) {
+            if (approvedToStartWatch) {
+                if (isIgnitionHeartbeat) {
+                    isIgnitionHeartbeat = false;
+                    watchdog.StartWatch();
+                } else {
+                    watchdog.DoHeartbeat();
+                }
+            }
 
             try {
                 Application.Current.Dispatcher.Invoke(() => {
@@ -284,29 +338,71 @@ namespace WatchdogBrowser.Models {
             //
         }
 
+
+        bool firstload = true;
+        bool approvedToStartWatch = false;
         //Обработчик события конца загрузки документа
         private void Browser_FrameLoadEnd(object sender, FrameLoadEndEventArgs e) {
-            //try {
-            //    Application.Current.Dispatcher.Invoke(() => {
-            //        if (ReloadingMessageVisible) {
-            //            ReloadingMessageVisible = false;
-            //        }
-            //    });
-            //} catch { }
+            try {
+                Application.Current.Dispatcher.Invoke(() => {
+                    if (Watched && e.Browser.HasDocument && e.HttpStatusCode == 200 && (e.Url.Contains(Url) || Url.Contains(e.Url))) {
+                        pageLoadFinished = true;
+                    }
+                    if (ReloadingMessageVisible) {
+                        ReloadingMessageVisible = false;
+                    }
+                });
+            } catch { }
+            if (firstload) {
+                Debug.WriteLine($"WATCHED-------------->{Watched}");
+                Debug.WriteLine($"-------HAS-DOC------->{e.Browser.HasDocument}");
+                Debug.WriteLine($"---------STATUS------>{e.HttpStatusCode}");
+                Debug.WriteLine($"URL------------------>{e.Url}");
+                if (Watched && e.Browser.HasDocument && e.HttpStatusCode == 200 && e.Url.Contains(Url)) {
+                    approvedToStartWatch = true;
+                    watchdog.HeartbeatTimeout = HeartbeatTimeout;
+                    watchdog.SwitchMirrorTimeout = SwitchMirrorTimeout;
+                    watchdog.NeedChangeMirror += Watchdog_NeedChangeMirror;
+                    watchdog.NeedReload += Watchdog_NeedReload;
+                }
+                firstload = false;
+            } else {
+                if (Watched && e.Browser.HasDocument && e.HttpStatusCode == 200 && e.Url.Contains(Url) && e.Url.ToLower().Contains("login")) {
+                    watchdog?.StopWatch();
+                }
+                isIgnitionHeartbeat = true;
+            }
+        }
+
+        private void Watchdog_NeedReload(object sender, EventArgs e) {
+            Application.Current.Dispatcher.Invoke(() => {
+                //if (ReloadingMessageVisible) {
+                //Debug.WriteLine("Need reload");
+                ReloadBrowser();
+                //}
+            });
+        }
+
+
+
+        private void Watchdog_NeedChangeMirror(object sender, EventArgs e) {
+            Application.Current.Dispatcher.Invoke(() => {
+                SwitchMirror();
+            });
         }
 
         //Обработчик события ошибки загрузки документа
         private void Browser_LoadError(object sender, CefSharp.LoadErrorEventArgs e) {
             //MessageBox.Show($"Ошибка загрузки страницыю код: {e.ErrorCode}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             //TODO: Логика умного апдейта
-
+            if (e.ErrorCode == CefErrorCode.Aborted) return;
             try {
                 Application.Current.Dispatcher.Invoke(() => {
                     HandleLoadError((IWpfWebBrowser)sender);
                 });
             } catch { }
 
-            Debug.WriteLine($"Перезагрузка после {e.ErrorCode}; РЕАЛИЗУЙ УМНУЮ ПЕРЕЗАГРУЗКУ", "LOAD LIFECYCLE");
+            // Debug.WriteLine($"Перезагрузка после {e.ErrorCode}; РЕАЛИЗУЙ УМНУЮ ПЕРЕЗАГРУЗКУ", "LOAD LIFECYCLE");
         }
 
         /// <summary>
@@ -316,8 +412,7 @@ namespace WatchdogBrowser.Models {
         private void HandleLoadError(IWpfWebBrowser browser) {
             var tsk = Task.Run(async () => {
                 await Task.Delay(3000);//задержка перезагрузки, чтобы снизить нагрузку на систему, реально можно BSOD поймать
-                LoadErrorVisible = true;//показываем страшное сообщение об ошибке
-                browser.Reload();//перезагружаем страницу
+                ReloadBrowser();
             });
         }
 
@@ -335,6 +430,11 @@ namespace WatchdogBrowser.Models {
             WebBrowser?.Dispose();
         }
 
+        private void ReloadBrowser() {
+            LoadErrorVisible = true;//показываем страшное сообщение об ошибке
+            browser?.Reload();//перезагружаем страницу
+        }
+
         private void SwitchMirror() {
             if (Mirrors.Count == 0) return;
             activeMirror++;
@@ -343,5 +443,8 @@ namespace WatchdogBrowser.Models {
             }
             Url = Mirrors[activeMirror];
         }
+
+
+
     }
 }

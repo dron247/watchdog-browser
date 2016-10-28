@@ -154,6 +154,7 @@
     <Compile Include="Models\TabItemModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\ViewModelLocator.cs" />
+    <Compile Include="Workers\Watchdog.cs" />
     <Page Include="Controls\BrowserTabContent.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
