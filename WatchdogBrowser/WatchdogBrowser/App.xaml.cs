@@ -41,6 +41,9 @@ namespace WatchdogBrowser {
             bool multithread = true;
             settings.MultiThreadedMessageLoop = multithread;
             settings.ExternalMessagePump = !multithread;
+            settings.PersistSessionCookies = true;
+            settings.PersistUserPreferences = true;
+            settings.WindowlessRenderingEnabled = true;
 
             if (!Cef.Initialize(settings, performDependencyCheck: true, browserProcessHandler: new BrowserProcessHandler())) {
                 throw new Exception("Unable to Initialize Cef");

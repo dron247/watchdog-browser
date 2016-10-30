@@ -30,45 +30,56 @@
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="1" Text="{Binding SelectedTab.Url}" Margin="10,0,10,0"/>
         </Grid>
-        <controls:NonReloadingTabControl x:Name="uxTabs" ItemsSource="{Binding Tabs, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding SelectedTab}">
-            <TabControl.ItemTemplate>
-                <DataTemplate>
-                    <Grid Width="auto" Height="38" MinWidth="100">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="auto"/>
-                            <ColumnDefinition Width="auto"/>
-                            <ColumnDefinition Width="auto"/>
-                            <ColumnDefinition Width="auto"/>
-                        </Grid.ColumnDefinitions>
-                        <materialDesign:PackIcon Grid.Column="0" Height="20" Width="20" VerticalAlignment="Center" Kind="laptop" Foreground="{Binding AlertColor, Mode=OneWay}"/>
-                        <TextBlock Grid.Column="1" Margin="10, 3, 16, 3" VerticalAlignment="Center">
+        <DockPanel LastChildFill="True">
+            <!--Header, it shows only tab headers, because wpf tab control behaviour is fucked up-->
+            <controls:NonReloadingTabControl DockPanel.Dock="Top" x:Name="uxTabs" ItemsSource="{Binding Tabs, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding SelectedTab}">
+                <TabControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Width="auto" Height="38" MinWidth="100">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition Width="auto"/>
+                            </Grid.ColumnDefinitions>
+                            <materialDesign:PackIcon Grid.Column="0" Height="20" Width="20" VerticalAlignment="Center" Kind="laptop" Foreground="{Binding AlertColor, Mode=OneWay}"/>
+                            <TextBlock Grid.Column="1" Margin="10, 3, 16, 3" VerticalAlignment="Center">
                             <Run Text="{Binding Title, Mode=OneWay}" Foreground="{Binding AlertColor, Mode=OneWay}"/>
-                        </TextBlock>
-                        <Button VerticalAlignment="Center" Margin="3,0,3,0" Grid.Column="2" HorizontalAlignment="Right" Command="{Binding SwitchMirrorCommand}" Visibility="{Binding SwitchMirrorVisibility,Mode=OneTime}" IsEnabled="{Binding Watched, Mode=OneWay}" ToolTip="Сменить сервер">
-                            <materialDesign:PackIcon Grid.Column="0" Height="20" Width="20" VerticalAlignment="Center" Kind="SwapHorizontal"/>
-                        </Button>
-                        <Button VerticalAlignment="Center" Grid.Column="3" HorizontalAlignment="Right" Command="{Binding CloseTabCommand}" Visibility="{Binding CloseButtonVisibility, Mode=OneWay}" IsEnabled="{Binding Closeable, Mode=OneWay}">
-                            <TextBlock Foreground="White" Margin="3,0" FontWeight="Bold">ЗАКРЫТЬ</TextBlock>
-                        </Button>
-                    </Grid>
-                </DataTemplate>
-            </TabControl.ItemTemplate>
-            <TabControl.ContentTemplate>
-                <DataTemplate>
-                    <Grid>
+                            </TextBlock>
+                            <Button VerticalAlignment="Center" Margin="3,0,3,0" Grid.Column="2" HorizontalAlignment="Right" Command="{Binding SwitchMirrorCommand}" Visibility="{Binding SwitchMirrorVisibility,Mode=OneTime}" IsEnabled="{Binding Watched, Mode=OneWay}" ToolTip="Сменить сервер">
+                                <materialDesign:PackIcon Grid.Column="0" Height="20" Width="20" VerticalAlignment="Center" Kind="SwapHorizontal"/>
+                            </Button>
+                            <Button VerticalAlignment="Center" Grid.Column="3" HorizontalAlignment="Right" Command="{Binding CloseTabCommand}" Visibility="{Binding CloseButtonVisibility, Mode=OneWay}" IsEnabled="{Binding Closeable, Mode=OneWay}">
+                                <TextBlock Foreground="White" Margin="3,0" FontWeight="Bold">ЗАКРЫТЬ</TextBlock>
+                            </Button>
+                        </Grid>
+                    </DataTemplate>
+                </TabControl.ItemTemplate>
+                <TabControl.ContentTemplate>
+                    <DataTemplate>
+                        <Grid Height="0" HorizontalAlignment="Stretch" Background="Red"/>
+                    </DataTemplate>
+                </TabControl.ContentTemplate>
+            </controls:NonReloadingTabControl>
+            <!--Tab content, collection of browsers layered over each other, visibility ruled by z-index-->
+            <ItemsControl Background="Red"  VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ItemsSource="{Binding Tabs, Mode=OneWay}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Grid/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
                         <controls:BrowserTabContent Content="{Binding}"/>
-                        <materialDesign:Card Panel.ZIndex="1001" Visibility="{Binding ReloadingMessageVisibility, Mode=OneWay}" Padding="32" HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"                     
-                             Value="0" Width="64" Height="64"
-                             IsIndeterminate="True" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        </materialDesign:Card>
-                        <materialDesign:Card Panel.ZIndex="1000" Background="Red" Visibility="{Binding LoadErrorVisibility, Mode=OneWay}" Padding="32" HorizontalAlignment="Center" VerticalAlignment="Center" Height="320" Width="480">
-                            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="Ошибка загрузки!" FontSize="46" Foreground="White"/>
-                        </materialDesign:Card>
-                    </Grid>
-                </DataTemplate>
-            </TabControl.ContentTemplate>
-        </controls:NonReloadingTabControl>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="ContentPresenter">
+                        <Setter Property="Grid.ZIndex" Value="{Binding ZIndex, Mode=OneWay}"/>
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
+            </ItemsControl>
+        </DockPanel>
     </DockPanel>
 
 

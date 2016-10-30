@@ -25,6 +25,7 @@ namespace WatchdogBrowser.ViewModel {
     public class MainViewModel : ViewModelBase {
 
         SitesConfig config = new SitesConfig();
+        object locker = new object();
 
         /// <summary>
         /// Initializes a new instance of the MainViewModel class.
@@ -52,7 +53,9 @@ namespace WatchdogBrowser.ViewModel {
                 return tabs;
             }
             set {
-                tabs = value;
+                lock (locker) {
+                    tabs = value;
+                }
                 RaisePropertyChanged(nameof(Tabs));
             }
         }
@@ -64,7 +67,14 @@ namespace WatchdogBrowser.ViewModel {
             }
             set {
                 Set<TabItemModel>(nameof(this.SelectedTab), ref selectedTab, value);
-
+                lock (locker) {
+                    foreach (var tab in tabs) {
+                        tab.ZIndex = 0;
+                    }
+                }
+                try {
+                    selectedTab.ZIndex = 1000;
+                } catch { }
             }
         }
 
@@ -88,13 +98,16 @@ namespace WatchdogBrowser.ViewModel {
                 prepTab.Mirrors = site.Mirrors;
                 prepTab.Closeable = !site.Watched;
                 prepTab.Watched = site.Watched;
+                prepTab.ErrorMessage = site.Message;
                 prepTab.HeartbeatTimeout = site.UpdateInterval;
                 prepTab.PageLoadTimeout = site.UpdateTimeout;
                 prepTab.SwitchMirrorTimeout = site.SwitchMirrorTimeout;
                 prepTab.Close += TabClosed;
                 prepTab.CloseTabRequest += PrepTab_SelfCloseRequest;
                 prepTab.NewTabRequest += Tab_NewTabRequest;
-                Tabs.Add(prepTab);
+                lock (locker) {
+                    Tabs.Add(prepTab);
+                }
             }
             RaisePropertyChanged(nameof(Tabs));
             SelectedTab = Tabs[0];
@@ -110,18 +123,29 @@ namespace WatchdogBrowser.ViewModel {
 
         private void Tab_NewTabRequest(object sender, CustomEventArgs.TabRequestEventArgs e) {
             Application.Current.Dispatcher.Invoke(() => {
-                var tab = new TabItemModel { Title = "¬кладка тест", Url = e.URL, Closeable = true };
+                var tab = new TabItemModel {
+                    Title = "¬кладка тест",
+                    Url = e.URL,
+                    Closeable = true,
+                    Watched = false
+                };
                 tab.Close += TabClosed;
-                Tabs.Add(tab);
-                SelectedTab = tab;
+                tab.CloseTabRequest += PrepTab_SelfCloseRequest;
+                lock (locker) {
+                    Tabs.Add(tab);
+                }
                 RaisePropertyChanged(nameof(Tabs));
+                SelectedTab = tab;
             });
         }
 
         private void TabClosed(object sender, StringMessageEventArgs e) {
             //find tab
             if (e.Message != string.Empty) {
-                var tab = Tabs.Where((x) => x.Url.Contains(e.Message)).First();
+                TabItemModel tab = null;
+                lock (locker) {
+                    tab = Tabs.Where((x) => x.Url.Contains(e.Message)).First();
+                }
                 if (tab != null) {
                     tab.DisposeTab();
                     CloseTab(tab);
@@ -146,7 +170,9 @@ namespace WatchdogBrowser.ViewModel {
             if (Tabs.Count == 1) {
                 App.Current.Shutdown();
             } else {
-                Tabs.Remove(prey);
+                lock (locker) {
+                    Tabs.Remove(prey);
+                }
                 prey?.WebBrowser?.Dispose();
                 RaisePropertyChanged(nameof(Tabs));
 

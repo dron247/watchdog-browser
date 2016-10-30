@@ -13,6 +13,7 @@ namespace WatchdogBrowser.Models {
         public string Username { get; set; }
         public string Password { get; set; }
         public bool Watched { get; set; }
+        public string Message { get; set; }
 
         public List<string> Mirrors { get; set; }
 

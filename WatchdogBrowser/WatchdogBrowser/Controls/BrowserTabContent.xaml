@@ -6,13 +6,21 @@
              xmlns:local="clr-namespace:WatchdogBrowser.Controls"
              xmlns:cefSharp="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf"
              xmlns:system="clr-namespace:System;assembly=mscorlib"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+             TextElement.FontWeight="Regular"
+             TextElement.FontSize="14"
+             FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto"
+             TextOptions.TextFormattingMode="Ideal" 
+             TextOptions.TextRenderingMode="Auto"        
+             Background="{DynamicResource MaterialDesignPaper}"
              mc:Ignorable="d" 
              Loaded="UserControl_Loaded"
              Unloaded="UserControl_Unloaded"
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
         <cefSharp:ChromiumWebBrowser x:Name="browser"
-                                  Address="{Binding Url, Mode=TwoWay}"
+                                  Address="{Binding Url, Mode=OneWay}"
                                   Title="{Binding Title, Mode=TwoWay}"
                                   AllowDrop="False"
                                   WebBrowser="{Binding WebBrowser, Mode=OneWayToSource}">
@@ -20,5 +28,17 @@
                 <KeyBinding Key="I" Modifiers="Shift+Ctrl" Command="{Binding ShowDevtoolsCommand}"/>
             </cefSharp:ChromiumWebBrowser.InputBindings>
         </cefSharp:ChromiumWebBrowser>
+        <materialDesign:Card Panel.ZIndex="1001" Visibility="{Binding ReloadingMessageVisibility, Mode=OneWay}" Padding="32" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"                     
+                             Value="0" Width="64" Height="64"
+                             IsIndeterminate="True" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+        </materialDesign:Card>
+        <materialDesign:Card Panel.ZIndex="1000" Background="DarkSlateGray" Visibility="{Binding LoadErrorVisibility, Mode=OneWay}" Padding="32" HorizontalAlignment="Center" VerticalAlignment="Center" Height="320" Width="480">
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <TextBlock VerticalAlignment="Top" Margin="0,20,0,0" HorizontalAlignment="Center" Text="Ошибка загрузки!" FontSize="46" FontWeight="Bold" Foreground="White"/>
+                <TextBlock VerticalAlignment="Top" Margin="0,20,0,20" HorizontalAlignment="Center" Text="{Binding ErrorMessage,Mode=OneTime}" FontSize="16" Foreground="White" Width="400" TextWrapping="Wrap"/>
+            </StackPanel>
+
+        </materialDesign:Card>
     </Grid>
 </UserControl>

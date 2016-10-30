@@ -73,6 +73,7 @@ namespace WatchdogBrowser.Config {
                     Username = string.Empty,
                     Password = string.Empty,
                     Watched = false,
+                    Message = "Обратитесь в отдел IT",
                     Mirrors = new List<string> { $"http://yandex.ru" },
                     Whitelist = new List<string>()
                 };
@@ -89,7 +90,7 @@ namespace WatchdogBrowser.Config {
                     var xSite = xSites.Elements().First();
                     var siteName = string.Empty;
                     int updateOk = 10, updateFail = 60, updateTimeout = 20;
-                    string username = "", password = "";
+                    string username = "", password = "", message = "";
                     bool watched = false;
                     List<string> mirrors = new List<string>();
                     List<string> whitelist = new List<string>();
@@ -158,6 +159,15 @@ namespace WatchdogBrowser.Config {
                             }
                             continue;
                         }
+
+                        if (attr.Name == "message") {
+                            try {
+                                message = attr.Value;
+                            } catch {
+                                message = "";
+                            }
+                            continue;
+                        }
                     }
 
                     var xMirrors = xSite.Descendants("mirrors");
@@ -197,6 +207,7 @@ namespace WatchdogBrowser.Config {
                         Password = password,
                         Watched = watched,
                         Mirrors = mirrors,
+                        Message = message,
                         Whitelist = whitelist
                     };
 

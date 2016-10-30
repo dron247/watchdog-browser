@@ -36,7 +36,8 @@ namespace WatchdogBrowser.Workers {
                 if (interval > HeartbeatTimeout) {
                     if (interval > SwitchMirrorTimeout) {
                         NeedChangeMirror?.Invoke(this, EventArgs.Empty);
-                    } else if (interval > HeartbeatTimeout) {
+                        lastHeartbeat = DateTime.Now;
+                    } else  {
                         NeedReload?.Invoke(this, EventArgs.Empty);
                     }
                 }
