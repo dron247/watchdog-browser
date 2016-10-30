@@ -75,21 +75,25 @@ namespace WatchdogBrowser.Models {
             }
             set {
                 Set<string>(nameof(this.Url), ref url, value);
-                /*lock (locker) {
-                    if (Watched && !timerActive) {
-                        timerActive = true;
-                        pageLoadFinished = false;
-                        var timer = new Timer();
-                        timer.Interval = PageLoadTimeout * 1000;
-                        timer.AutoReset = false;
-                        timer.Elapsed += Timer_Elapsed;
-                        timer.Start();
-                    }
-                }*/
+                if (Watched) StartPageLoadTimer();
             }
         }
 
-        bool timerActive = false;
+        private void StartPageLoadTimer() {
+            lock (locker) {
+                if (Watched && !pageLoadTimerActive) {
+                    pageLoadTimerActive = true;
+                    pageLoadFinished = false;
+                    var timer = new Timer();
+                    timer.Interval = PageLoadTimeout > 0 ? PageLoadTimeout * 1000 : 20000;
+                    timer.AutoReset = false;
+                    timer.Elapsed += Timer_Elapsed;
+                    timer.Start();
+                }
+            }
+        }
+
+        bool pageLoadTimerActive = false;
         private void Timer_Elapsed(object sender, ElapsedEventArgs e) {
             lock (locker) {
                 Application.Current.Dispatcher.Invoke(() => {
@@ -98,7 +102,7 @@ namespace WatchdogBrowser.Models {
                     }
                 });
                 (sender as Timer).Stop();
-                timerActive = false;
+                pageLoadTimerActive = false;
                 (sender as Timer).Dispose();
             }
         }
@@ -152,6 +156,10 @@ namespace WatchdogBrowser.Models {
             }
         }
 
+        public string ErrorTime {
+            get; private set;
+        } = string.Empty;  
+
 
         public Visibility SwitchMirrorVisibility {
             get {
@@ -192,6 +200,13 @@ namespace WatchdogBrowser.Models {
             }
             set {
                 Set<bool>(nameof(LoadErrorVisible), ref loadErrorVisible, value);
+                if (loadErrorVisible) {
+                    var t = DateTime.Now;
+                    ErrorTime = ErrorTime == string.Empty ? t.ToString("hh:mm:ss") : ErrorTime;                    
+                }else {
+                    ErrorTime = string.Empty;
+                }
+                RaisePropertyChanged(nameof(ErrorTime));
                 RaisePropertyChanged(nameof(LoadErrorVisibility));
             }
         }
@@ -288,7 +303,6 @@ namespace WatchdogBrowser.Models {
             } catch { }
         }
 
-        bool isIgnitionHeartbeat = true;
         bool firstbeat = true;
         //Обработчик сообщения о том, что страница жива, если сообщения нет, то нужно принять меры
         private void JsBinding_Heartbeat(object sender, EventArgs e) {
@@ -303,16 +317,8 @@ namespace WatchdogBrowser.Models {
                 watchdog.NeedChangeMirror += Watchdog_NeedChangeMirror;
                 watchdog.NeedReload += Watchdog_NeedReload;
                 watchdog.StartWatch();
-                //watchdog.DoHeartbeat();
                 firstbeat = false;
             }
-
-            //if (approvedToStartWatch) {
-            //    if (isIgnitionHeartbeat) {
-            //        isIgnitionHeartbeat = false;
-            //        watchdog.StartWatch();
-            //    }
-            //}
 
             watchdog?.DoHeartbeat();
 
@@ -375,8 +381,6 @@ namespace WatchdogBrowser.Models {
         }
 
 
-        bool firstload = true;
-        bool approvedToStartWatch = false;
         //Обработчик события конца загрузки документа
         private void Browser_FrameLoadEnd(object sender, FrameLoadEndEventArgs e) {
             lock (locker) {
@@ -389,21 +393,6 @@ namespace WatchdogBrowser.Models {
                     }
                 });
             } catch { }
-            //if (firstload) {
-            //    if (Watched && e.Browser.HasDocument && e.HttpStatusCode == 200 && e.Url.Contains(Url)) {
-            //        approvedToStartWatch = true;
-            //        watchdog.HeartbeatTimeout = HeartbeatTimeout;
-            //        watchdog.SwitchMirrorTimeout = SwitchMirrorTimeout;
-            //        watchdog.NeedChangeMirror += Watchdog_NeedChangeMirror;
-            //        watchdog.NeedReload += Watchdog_NeedReload;
-            //    }
-            //    firstload = false;
-            //} else {
-            //    if (Watched && e.Browser.HasDocument && e.Url.Contains(Url) && e.Url.ToLower().Contains("login")) {
-            //        watchdog?.StopWatch();
-            //    }
-            //    isIgnitionHeartbeat = true;
-            //}
         }
 
         private void Watchdog_NeedReload(object sender, EventArgs e) {

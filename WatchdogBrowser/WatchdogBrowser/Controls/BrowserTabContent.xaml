@@ -36,6 +36,7 @@
         <materialDesign:Card Panel.ZIndex="1000" Background="DarkSlateGray" Visibility="{Binding LoadErrorVisibility, Mode=OneWay}" Padding="32" HorizontalAlignment="Center" VerticalAlignment="Center" Height="320" Width="480">
             <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                 <TextBlock VerticalAlignment="Top" Margin="0,20,0,0" HorizontalAlignment="Center" Text="Ошибка загрузки!" FontSize="46" FontWeight="Bold" Foreground="White"/>
+                <TextBlock VerticalAlignment="Top" Margin="0,20,0,0" HorizontalAlignment="Center" Text="{Binding ErrorTime, Mode=OneWay}" FontSize="46" FontWeight="Bold" Foreground="White"/>
                 <TextBlock VerticalAlignment="Top" Margin="0,20,0,20" HorizontalAlignment="Center" Text="{Binding ErrorMessage,Mode=OneTime}" FontSize="16" Foreground="White" Width="400" TextWrapping="Wrap"/>
             </StackPanel>
 

@@ -94,10 +94,10 @@ namespace WatchdogBrowser.ViewModel {
 
                 var prepTab = new TabItemModel();
                 prepTab.Title = site.Name;
+                prepTab.Watched = site.Watched;
                 prepTab.Url = site.Mirrors[0];
                 prepTab.Mirrors = site.Mirrors;
-                prepTab.Closeable = !site.Watched;
-                prepTab.Watched = site.Watched;
+                prepTab.Closeable = !site.Watched;                
                 prepTab.ErrorMessage = site.Message;
                 prepTab.HeartbeatTimeout = site.UpdateInterval;
                 prepTab.PageLoadTimeout = site.UpdateTimeout;
@@ -124,10 +124,11 @@ namespace WatchdogBrowser.ViewModel {
         private void Tab_NewTabRequest(object sender, CustomEventArgs.TabRequestEventArgs e) {
             Application.Current.Dispatcher.Invoke(() => {
                 var tab = new TabItemModel {
-                    Title = "¬кладка тест",
+                    Title = "",
+                    Watched = false,
                     Url = e.URL,
-                    Closeable = true,
-                    Watched = false
+                    Closeable = true
+                    
                 };
                 tab.Close += TabClosed;
                 tab.CloseTabRequest += PrepTab_SelfCloseRequest;
