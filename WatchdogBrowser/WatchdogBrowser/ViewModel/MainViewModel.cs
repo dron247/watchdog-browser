@@ -103,7 +103,6 @@ namespace WatchdogBrowser.ViewModel {
                 prepTab.PageLoadTimeout = site.UpdateTimeout;
                 prepTab.SwitchMirrorTimeout = site.SwitchMirrorTimeout;
                 prepTab.Close += TabClosed;
-                prepTab.CloseTabRequest += PrepTab_SelfCloseRequest;
                 prepTab.NewTabRequest += Tab_NewTabRequest;
                 lock (locker) {
                     Tabs.Add(prepTab);
@@ -113,13 +112,7 @@ namespace WatchdogBrowser.ViewModel {
             SelectedTab = Tabs[0];
         }
 
-        private void PrepTab_SelfCloseRequest(object sender, EventArgs e) {
-            try {
-                Application.Current.Dispatcher.Invoke(() => {
-                    CloseTab(SelectedTab);
-                });
-            } catch { }
-        }
+        
 
         private void Tab_NewTabRequest(object sender, CustomEventArgs.TabRequestEventArgs e) {
             Application.Current.Dispatcher.Invoke(() => {
@@ -127,11 +120,9 @@ namespace WatchdogBrowser.ViewModel {
                     Title = "",
                     Watched = false,
                     Url = e.URL,
-                    Closeable = true
-                    
+                    Closeable = true                    
                 };
                 tab.Close += TabClosed;
-                tab.CloseTabRequest += PrepTab_SelfCloseRequest;
                 lock (locker) {
                     Tabs.Add(tab);
                 }
@@ -139,22 +130,25 @@ namespace WatchdogBrowser.ViewModel {
                 SelectedTab = tab;
             });
         }
+        
 
         private void TabClosed(object sender, StringMessageEventArgs e) {
             //find tab
             if (e.Message != string.Empty) {
                 TabItemModel tab = null;
                 lock (locker) {
-                    tab = Tabs.Where((x) => x.Url.Contains(e.Message)).First();
+                    foreach(var t in Tabs) {
+                        if (t.Url.Contains(e.Message)) {
+                            tab = t;
+                            break;
+                        }
+                    }
                 }
                 if (tab != null) {
-                    tab.DisposeTab();
                     CloseTab(tab);
-                    Debug.WriteLine("_____________CLOSE BY URL_________");
                 }
             } else {
                 var prey = (TabItemModel)sender;
-                prey.DisposeTab();
                 CloseTab(prey);
             }
         }
@@ -174,10 +168,8 @@ namespace WatchdogBrowser.ViewModel {
                 lock (locker) {
                     Tabs.Remove(prey);
                 }
-                prey?.WebBrowser?.Dispose();
                 RaisePropertyChanged(nameof(Tabs));
-
-                Debug.WriteLine(Tabs.Count);
+                prey?.DisposeTab();
             }
         }
 

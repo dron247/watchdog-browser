@@ -28,7 +28,7 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="1" Text="{Binding SelectedTab.Url}" Margin="10,0,10,0"/>
+            <TextBlock Grid.Column="1" Text="{Binding SelectedTab.CurrentUrl, UpdateSourceTrigger=PropertyChanged}" Margin="10,0,10,0"/>
         </Grid>
         <DockPanel LastChildFill="True">
             <!--Header, it shows only tab headers, because wpf tab control behaviour is fucked up-->

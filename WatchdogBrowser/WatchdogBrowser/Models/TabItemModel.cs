@@ -28,7 +28,7 @@ namespace WatchdogBrowser.Models {
 
         public event EventHandler<StringMessageEventArgs> Close;
         public event EventHandler<TabRequestEventArgs> NewTabRequest;
-        public event EventHandler CloseTabRequest;
+        //public event EventHandler CloseTabRequest;
 
         Watchdog watchdog = new Watchdog();
         bool pageLoadFinished = false;
@@ -76,6 +76,12 @@ namespace WatchdogBrowser.Models {
             set {
                 Set<string>(nameof(this.Url), ref url, value);
                 if (Watched) StartPageLoadTimer();
+            }
+        }
+
+        public string CurrentUrl {
+            get {
+                return browser?.Address ?? string.Empty;
             }
         }
 
@@ -202,7 +208,7 @@ namespace WatchdogBrowser.Models {
                 Set<bool>(nameof(LoadErrorVisible), ref loadErrorVisible, value);
                 if (loadErrorVisible) {
                     var t = DateTime.Now;
-                    ErrorTime = ErrorTime == string.Empty ? t.ToString("hh:mm:ss") : ErrorTime;                    
+                    ErrorTime = ErrorTime == string.Empty ? t.ToString("HH:mm:ss") : ErrorTime;                    
                 }else {
                     ErrorTime = string.Empty;
                 }
@@ -281,9 +287,14 @@ namespace WatchdogBrowser.Models {
         public MonitorJSBound JsBinding {
             set {
                 jsBinding = value;
-                jsBinding.Heartbeat += JsBinding_Heartbeat;
-                jsBinding.CloseTab += JsBinding_CloseTab;
-                jsBinding.AlarmStateUpdated += JsBinding_AlarmStateUpdated;
+                if (Watched) {
+                    jsBinding.Heartbeat += JsBinding_Heartbeat;
+                    jsBinding.AlarmStateUpdated += JsBinding_AlarmStateUpdated;
+                }
+                jsBinding.CloseTab += JsBinding_CloseTab;                
+            }
+            get {
+                return jsBinding;
             }
         }
 
@@ -351,20 +362,6 @@ namespace WatchdogBrowser.Models {
                     lHandler.NewTabRequest += (s, e) => {
                         NewTabRequest?.Invoke(this, e);
                     };
-                    //lHandler.CloseTabRequest += (s, e) => {
-                    //var brwsr = (IBrowser)s;
-                    //try {
-                    //    //Так как обработка идёт из потока, плюс ко всему от биндинга неродного контрола, tst нужны чтобы вызвать exception
-                    //    //он вызывается если был открыт попап типа девтулзов, если всё норм, значит вкладка
-                    //    //да, костыль, но не критичный
-                    //    if (!brwsr.IsPopup) {
-                    //        CloseTabRequest?.Invoke(this, e);
-                    //    }
-                    //} catch {
-                    //    //MessageBox.Show("Disposed");
-                    //}
-
-                    //};
                     browser.LifeSpanHandler = lHandler;
                 }
             }
@@ -393,14 +390,14 @@ namespace WatchdogBrowser.Models {
                     }
                 });
             } catch { }
+            RaisePropertyChanged(nameof(CurrentUrl));
+            RaisePropertyChanged("SelectedTab.CurrentUrl");
         }
 
         private void Watchdog_NeedReload(object sender, EventArgs e) {
             Application.Current.Dispatcher.Invoke(() => {
-                //if (ReloadingMessageVisible) {
                 //Debug.WriteLine("Need reload");
                 ReloadBrowser();
-                //}
             });
         }
 
@@ -408,6 +405,7 @@ namespace WatchdogBrowser.Models {
 
         private void Watchdog_NeedChangeMirror(object sender, EventArgs e) {
             Application.Current.Dispatcher.Invoke(() => {
+                //Debug.WriteLine("Need mirror change");
                 SwitchMirror();
             });
         }
@@ -415,7 +413,6 @@ namespace WatchdogBrowser.Models {
         //Обработчик события ошибки загрузки документа
         private void Browser_LoadError(object sender, CefSharp.LoadErrorEventArgs e) {
             //MessageBox.Show($"Ошибка загрузки страницыю код: {e.ErrorCode}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            //TODO: Логика умного апдейта
             if (e.ErrorCode == CefErrorCode.Aborted) return;
             try {
                 Application.Current.Dispatcher.Invoke(() => {
@@ -448,7 +445,14 @@ namespace WatchdogBrowser.Models {
         #endregion
 
         public void DisposeTab() {
-            WebBrowser?.Dispose();
+            jsBinding.Heartbeat -= JsBinding_Heartbeat;
+            jsBinding.CloseTab -= JsBinding_CloseTab;
+            jsBinding.AlarmStateUpdated -= JsBinding_AlarmStateUpdated;
+            ZIndex = 0;
+            var tsk = Task.Run(async () => {
+                await Task.Delay(3000);//задержка перезагрузки, чтобы снизить нагрузку на систему, реально можно BSOD поймать
+                WebBrowser?.Dispose();
+            });
         }
 
         private void ReloadBrowser() {
