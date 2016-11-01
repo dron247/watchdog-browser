@@ -31,8 +31,8 @@ namespace WatchdogBrowser.Workers {
         private void Timer_Elapsed(object sender, ElapsedEventArgs e) {            
             lock (locker) {
                 currentTime = DateTime.Now;
-                var interval = currentTime.Subtract(lastHeartbeat).Seconds;
-                Debug.WriteLine($"interval = {interval}");
+                var interval = currentTime.Subtract(lastHeartbeat).TotalSeconds;
+                //Debug.WriteLine($"interval = {interval}");
                 if (interval > HeartbeatTimeout) {
                     if (interval > SwitchMirrorTimeout) {
                         NeedChangeMirror?.Invoke(this, EventArgs.Empty);

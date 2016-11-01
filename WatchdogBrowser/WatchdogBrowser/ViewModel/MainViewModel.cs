@@ -99,6 +99,7 @@ namespace WatchdogBrowser.ViewModel {
                 prepTab.Mirrors = site.Mirrors;
                 prepTab.Closeable = !site.Watched;                
                 prepTab.ErrorMessage = site.Message;
+                prepTab.WarningSoundPath = site.WarningSoundPath;
                 prepTab.HeartbeatTimeout = site.UpdateInterval;
                 prepTab.PageLoadTimeout = site.UpdateTimeout;
                 prepTab.SwitchMirrorTimeout = site.SwitchMirrorTimeout;

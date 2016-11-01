@@ -74,6 +74,7 @@ namespace WatchdogBrowser.Config {
                     Password = string.Empty,
                     Watched = false,
                     Message = "Обратитесь в отдел IT",
+                    WarningSoundPath = string.Empty,
                     Mirrors = new List<string> { $"http://yandex.ru" },
                     Whitelist = new List<string>()
                 };
@@ -90,7 +91,7 @@ namespace WatchdogBrowser.Config {
                     var xSite = xSites.Elements().First();
                     var siteName = string.Empty;
                     int updateOk = 10, updateFail = 60, updateTimeout = 20;
-                    string username = "", password = "", message = "";
+                    string username = string.Empty, password = string.Empty, message = string.Empty, warningSoundPath = string.Empty;
                     bool watched = false;
                     List<string> mirrors = new List<string>();
                     List<string> whitelist = new List<string>();
@@ -137,7 +138,7 @@ namespace WatchdogBrowser.Config {
                             try {
                                 username = attr.Value;
                             } catch {
-                                username = "";
+                                username = string.Empty;
                             }
                             continue;
                         }
@@ -146,7 +147,7 @@ namespace WatchdogBrowser.Config {
                             try {
                                 password = attr.Value;
                             } catch {
-                                password = "";
+                                password = string.Empty;
                             }
                             continue;
                         }
@@ -164,7 +165,16 @@ namespace WatchdogBrowser.Config {
                             try {
                                 message = attr.Value;
                             } catch {
-                                message = "";
+                                message = string.Empty;
+                            }
+                            continue;
+                        }
+
+                        if (attr.Name == "warningSoundPath") {
+                            try {
+                                warningSoundPath = attr.Value;
+                            } catch {
+                                warningSoundPath = string.Empty;
                             }
                             continue;
                         }
@@ -208,6 +218,7 @@ namespace WatchdogBrowser.Config {
                         Watched = watched,
                         Mirrors = mirrors,
                         Message = message,
+                        WarningSoundPath = warningSoundPath,
                         Whitelist = whitelist
                     };
 

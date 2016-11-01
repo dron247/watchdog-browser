@@ -243,6 +243,8 @@ namespace WatchdogBrowser.Models {
 
         public string ErrorMessage { get; set; }
 
+        public string WarningSoundPath { get; set; } = string.Empty;
+
 
         #region COMMANDS
         public ICommand SwitchMirrorCommand { get; private set; }
@@ -450,7 +452,7 @@ namespace WatchdogBrowser.Models {
             jsBinding.AlarmStateUpdated -= JsBinding_AlarmStateUpdated;
             ZIndex = 0;
             var tsk = Task.Run(async () => {
-                await Task.Delay(3000);//задержка перезагрузки, чтобы снизить нагрузку на систему, реально можно BSOD поймать
+                await Task.Delay(3000);//задержка уничтожения, чтобы не подвисало при закрытии вкладки
                 WebBrowser?.Dispose();
             });
         }
@@ -468,9 +470,18 @@ namespace WatchdogBrowser.Models {
                 activeMirror = 0;
             }
             Url = Mirrors[activeMirror];
+            PlayWarningSound();
         }
 
-
+        private void PlayWarningSound() {
+            var tsk = Task.Run(async () => {
+                if (WarningSoundPath != string.Empty) {
+                    var player = new System.Media.SoundPlayer(WarningSoundPath);
+                    player.Play();
+                }
+                await Task.Delay(3000);//задержка повтора
+            });
+        }
 
     }
 }

@@ -14,6 +14,7 @@ namespace WatchdogBrowser.Models {
         public string Password { get; set; }
         public bool Watched { get; set; }
         public string Message { get; set; }
+        public string WarningSoundPath { get; set; }
 
         public List<string> Mirrors { get; set; }
 
