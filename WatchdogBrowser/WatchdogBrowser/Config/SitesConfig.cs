@@ -75,6 +75,7 @@ namespace WatchdogBrowser.Config {
                     Watched = false,
                     Message = "Обратитесь в отдел IT",
                     WarningSoundPath = string.Empty,
+                    ErrorSoundPath = string.Empty,
                     Mirrors = new List<string> { $"http://yandex.ru" },
                     Whitelist = new List<string>()
                 };
@@ -91,7 +92,7 @@ namespace WatchdogBrowser.Config {
                     var xSite = xSites.Elements().First();
                     var siteName = string.Empty;
                     int updateOk = 10, updateFail = 60, updateTimeout = 20;
-                    string username = string.Empty, password = string.Empty, message = string.Empty, warningSoundPath = string.Empty;
+                    string username = string.Empty, password = string.Empty, message = string.Empty, warningSoundPath = string.Empty, errorSoundPath = string.Empty;
                     bool watched = false;
                     List<string> mirrors = new List<string>();
                     List<string> whitelist = new List<string>();
@@ -178,6 +179,15 @@ namespace WatchdogBrowser.Config {
                             }
                             continue;
                         }
+                        
+                        if (attr.Name == "errorSoundPath") {
+                            try {
+                                errorSoundPath = attr.Value;
+                            } catch {
+                                errorSoundPath = string.Empty;
+                            }
+                            continue;
+                        }
                     }
 
                     var xMirrors = xSite.Descendants("mirrors");
@@ -219,6 +229,7 @@ namespace WatchdogBrowser.Config {
                         Mirrors = mirrors,
                         Message = message,
                         WarningSoundPath = warningSoundPath,
+                        ErrorSoundPath = errorSoundPath,
                         Whitelist = whitelist
                     };
 

@@ -206,16 +206,12 @@ namespace WatchdogBrowser.Models {
             }
             set {
                 Set<bool>(nameof(LoadErrorVisible), ref loadErrorVisible, value);
-                if (loadErrorVisible) {
-                    var t = DateTime.Now;
-                    ErrorTime = ErrorTime == string.Empty ? t.ToString("HH:mm:ss") : ErrorTime;                    
-                }else {
-                    ErrorTime = string.Empty;
-                }
-                RaisePropertyChanged(nameof(ErrorTime));
-                RaisePropertyChanged(nameof(LoadErrorVisibility));
+                ShowErrorMessage();
             }
         }
+
+        
+
         /// <summary>
         /// Видно ли сообщение об ошибке загрузки, только для интерфейса
         /// </summary>
@@ -244,6 +240,8 @@ namespace WatchdogBrowser.Models {
         public string ErrorMessage { get; set; }
 
         public string WarningSoundPath { get; set; } = string.Empty;
+
+        public string ErrorSoundPath { get; set; } = string.Empty;
 
 
         #region COMMANDS
@@ -473,11 +471,42 @@ namespace WatchdogBrowser.Models {
             PlayWarningSound();
         }
 
+
+        bool isErrorShown = false;
+        private void ShowErrorMessage() {
+            if (loadErrorVisible) { 
+                var t = DateTime.Now;
+                ErrorTime = ErrorTime == string.Empty ? t.ToString("HH:mm:ss") : ErrorTime;
+                if (!isErrorShown) {
+                    PlayErrorSound();
+                }
+                isErrorShown = true;
+            } else {
+                ErrorTime = string.Empty;
+                isErrorShown = false;
+            }
+            RaisePropertyChanged(nameof(ErrorTime));
+            RaisePropertyChanged(nameof(LoadErrorVisibility));
+        }
+
+        private void PlayErrorSound() {
+            var tsk = Task.Run(async () => {
+                if (ErrorSoundPath != string.Empty) {
+                    var player = new System.Media.SoundPlayer(ErrorSoundPath);
+                    player.Play();
+                    player.Dispose();
+                }
+                await Task.Delay(1);//задержка повтора
+            });
+        }
+
+
         private void PlayWarningSound() {
             var tsk = Task.Run(async () => {
                 if (WarningSoundPath != string.Empty) {
                     var player = new System.Media.SoundPlayer(WarningSoundPath);
                     player.Play();
+                    player.Dispose();
                 }
                 await Task.Delay(3000);//задержка повтора
             });

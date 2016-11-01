@@ -100,6 +100,7 @@ namespace WatchdogBrowser.ViewModel {
                 prepTab.Closeable = !site.Watched;                
                 prepTab.ErrorMessage = site.Message;
                 prepTab.WarningSoundPath = site.WarningSoundPath;
+                prepTab.ErrorSoundPath = site.ErrorSoundPath;
                 prepTab.HeartbeatTimeout = site.UpdateInterval;
                 prepTab.PageLoadTimeout = site.UpdateTimeout;
                 prepTab.SwitchMirrorTimeout = site.SwitchMirrorTimeout;
