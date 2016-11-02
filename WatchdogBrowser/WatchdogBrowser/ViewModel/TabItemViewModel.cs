@@ -292,7 +292,7 @@ namespace WatchdogBrowser.ViewModel {
        
         //Обработчик сообщения о том, что страница жива, если сообщения нет, то нужно принять меры
         private void JsBinding_Heartbeat(object sender, EventArgs e) {
-            Debug.WriteLine("HEARTBEAT");
+            //Debug.WriteLine("HEARTBEAT");
             lock (locker) {
                 pageLoadFinished = true;
             }
