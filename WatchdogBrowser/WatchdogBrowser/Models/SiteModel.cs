@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 namespace WatchdogBrowser.Models {
     public class SiteModel {
         public string Name { get; set; }
-        public int UpdateInterval { get; set; }
+        public int HeartbeatTimeout { get; set; }
         public int SwitchMirrorTimeout { get; set; }
-        public int UpdateTimeout { get; set; }
+        public int LoadPageTimeout { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
         public bool Watched { get; set; }

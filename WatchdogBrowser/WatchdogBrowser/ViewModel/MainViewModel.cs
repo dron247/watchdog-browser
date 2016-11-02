@@ -2,12 +2,9 @@ using GalaSoft.MvvmLight;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Linq;
 using System.Windows;
 using WatchdogBrowser.Config;
 using WatchdogBrowser.CustomEventArgs;
-using WatchdogBrowser.Models;
 
 namespace WatchdogBrowser.ViewModel {
     /// <summary>
@@ -46,9 +43,9 @@ namespace WatchdogBrowser.ViewModel {
 
         #region СВОЙСТВА ПРИВЯЗКИ
 
-        private ObservableCollection<TabItemModel> tabs = new ObservableCollection<TabItemModel>();
+        private ObservableCollection<TabItemViewModel> tabs = new ObservableCollection<TabItemViewModel>();
 
-        public ObservableCollection<TabItemModel> Tabs {
+        public ObservableCollection<TabItemViewModel> Tabs {
             get {
                 return tabs;
             }
@@ -60,13 +57,13 @@ namespace WatchdogBrowser.ViewModel {
             }
         }
 
-        private TabItemModel selectedTab;
-        public TabItemModel SelectedTab {
+        private TabItemViewModel selectedTab;
+        public TabItemViewModel SelectedTab {
             get {
                 return selectedTab;
             }
             set {
-                Set<TabItemModel>(nameof(this.SelectedTab), ref selectedTab, value);
+                Set<TabItemViewModel>(nameof(this.SelectedTab), ref selectedTab, value);
                 lock (locker) {
                     foreach (var tab in tabs) {
                         tab.ZIndex = 0;
@@ -87,12 +84,12 @@ namespace WatchdogBrowser.ViewModel {
         private void Config_Ready(object sender, CustomEventArgs.ConfigReadyEventArgs e) {
             var sitesList = e.Sites;
 
-            var prepTabs = new List<TabItemModel>();
+            var prepTabs = new List<TabItemViewModel>();
             foreach (var site in sitesList) {
                 Credntials.CredentialsManager.DefaultInstance.Username = site.Username;
                 Credntials.CredentialsManager.DefaultInstance.Password = site.Password;
 
-                var prepTab = new TabItemModel();
+                var prepTab = new TabItemViewModel();
                 prepTab.Title = site.Name;
                 prepTab.Watched = site.Watched;
                 prepTab.Url = site.Mirrors[0];
@@ -101,8 +98,8 @@ namespace WatchdogBrowser.ViewModel {
                 prepTab.ErrorMessage = site.Message;
                 prepTab.WarningSoundPath = site.WarningSoundPath;
                 prepTab.ErrorSoundPath = site.ErrorSoundPath;
-                prepTab.HeartbeatTimeout = site.UpdateInterval;
-                prepTab.PageLoadTimeout = site.UpdateTimeout;
+                prepTab.HeartbeatTimeout = site.HeartbeatTimeout;
+                prepTab.PageLoadTimeout = site.LoadPageTimeout;
                 prepTab.SwitchMirrorTimeout = site.SwitchMirrorTimeout;
                 prepTab.Close += TabClosed;
                 prepTab.NewTabRequest += Tab_NewTabRequest;
@@ -118,13 +115,14 @@ namespace WatchdogBrowser.ViewModel {
 
         private void Tab_NewTabRequest(object sender, CustomEventArgs.TabRequestEventArgs e) {
             Application.Current.Dispatcher.Invoke(() => {
-                var tab = new TabItemModel {
+                var tab = new TabItemViewModel {
                     Title = "",
                     Watched = false,
                     Url = e.URL,
                     Closeable = true                    
                 };
                 tab.Close += TabClosed;
+                tab.NewTabRequest += Tab_NewTabRequest;
                 lock (locker) {
                     Tabs.Add(tab);
                 }
@@ -137,7 +135,7 @@ namespace WatchdogBrowser.ViewModel {
         private void TabClosed(object sender, StringMessageEventArgs e) {
             //find tab
             if (e.Message != string.Empty) {
-                TabItemModel tab = null;
+                TabItemViewModel tab = null;
                 lock (locker) {
                     foreach(var t in Tabs) {
                         if (t.Url.Contains(e.Message)) {
@@ -150,7 +148,7 @@ namespace WatchdogBrowser.ViewModel {
                     CloseTab(tab);
                 }
             } else {
-                var prey = (TabItemModel)sender;
+                var prey = (TabItemViewModel)sender;
                 CloseTab(prey);
             }
         }
@@ -163,7 +161,7 @@ namespace WatchdogBrowser.ViewModel {
         /// Метод закрытия указаной вкладки
         /// </summary>
         /// <param name="prey">Модель вкладки под закрытие</param>
-        private void CloseTab(TabItemModel prey) {
+        private void CloseTab(TabItemViewModel prey) {
             if (Tabs.Count == 1) {
                 App.Current.Shutdown();
             } else {

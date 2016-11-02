@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
 using System.Xml.Linq;
 using WatchdogBrowser.CustomEventArgs;
 using WatchdogBrowser.Models;
@@ -67,9 +63,9 @@ namespace WatchdogBrowser.Config {
             if (xmlString.Equals(string.Empty)) {
                 var siteModel = new SiteModel {
                     Name = "Файл конфигупации не найден",
-                    UpdateInterval = 0,
+                    HeartbeatTimeout = 0,
                     SwitchMirrorTimeout = 0,
-                    UpdateTimeout = 0,
+                    LoadPageTimeout = 0,
                     Username = string.Empty,
                     Password = string.Empty,
                     Watched = false,
@@ -91,7 +87,7 @@ namespace WatchdogBrowser.Config {
                     //берём только первый элемент, по ТЗ он один, но такой код даёт задел на доработку
                     var xSite = xSites.Elements().First();
                     var siteName = string.Empty;
-                    int updateOk = 10, updateFail = 60, updateTimeout = 20;
+                    int intervalHeartbeat = 10, intervalMirror = 60, intervalPageLoad = 20;
                     string username = string.Empty, password = string.Empty, message = string.Empty, warningSoundPath = string.Empty, errorSoundPath = string.Empty;
                     bool watched = false;
                     List<string> mirrors = new List<string>();
@@ -108,29 +104,29 @@ namespace WatchdogBrowser.Config {
                             continue;
                         }
 
-                        if (attr.Name == "heartbeatTimeout") {
+                        if (attr.Name == "intervalHeartbeat") {
                             try {
-                                updateOk = int.Parse(attr.Value);
+                                intervalHeartbeat = int.Parse(attr.Value);
                             } catch {
-                                updateOk = 10;
+                                intervalHeartbeat = 10;
                             }
                             continue;
                         }
 
-                        if (attr.Name == "mirrorTimeout") {
+                        if (attr.Name == "intervalMirror") {
                             try {
-                                updateFail = int.Parse(attr.Value);
+                                intervalMirror = int.Parse(attr.Value);
                             } catch {
-                                updateFail = 60;
+                                intervalMirror = 60;
                             }
                             continue;
                         }
 
-                        if (attr.Name == "pageLoadTimeout") {
+                        if (attr.Name == "intervalPageLoad") {
                             try {
-                                updateTimeout = int.Parse(attr.Value);
+                                intervalPageLoad = int.Parse(attr.Value);
                             } catch {
-                                updateTimeout = 20;
+                                intervalPageLoad = 20;
                             }
                             continue;
                         }
@@ -220,9 +216,9 @@ namespace WatchdogBrowser.Config {
 
                     var siteModel = new SiteModel {
                         Name = siteName,
-                        UpdateInterval = updateOk,
-                        SwitchMirrorTimeout = updateFail,
-                        UpdateTimeout = updateTimeout,
+                        HeartbeatTimeout = intervalHeartbeat,
+                        SwitchMirrorTimeout = intervalMirror,
+                        LoadPageTimeout = intervalPageLoad,
                         Username = username,
                         Password = password,
                         Watched = watched,

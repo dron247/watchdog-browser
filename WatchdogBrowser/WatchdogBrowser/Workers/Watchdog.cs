@@ -11,7 +11,7 @@ namespace WatchdogBrowser.Workers {
         public Watchdog() { }
 
         public void StartWatch() {
-            lastHeartbeat = DateTime.Now;
+            LastHeartbeat = DateTime.Now;
             if (timer == null) {
                 timer = new Timer(1000);
                 timer.AutoReset = true;
@@ -27,27 +27,33 @@ namespace WatchdogBrowser.Workers {
             timer?.Stop();
         }
 
-        object locker = new object();
-        private void Timer_Elapsed(object sender, ElapsedEventArgs e) {            
+
+        private void Timer_Elapsed(object sender, ElapsedEventArgs e) {
             lock (locker) {
                 currentTime = DateTime.Now;
-                var interval = currentTime.Subtract(lastHeartbeat).TotalSeconds;
+                var interval = (int)currentTime.Subtract(LastHeartbeat).TotalSeconds;
                 //Debug.WriteLine($"interval = {interval}");
                 if (interval > HeartbeatTimeout) {
                     if (interval > SwitchMirrorTimeout) {
                         NeedChangeMirror?.Invoke(this, EventArgs.Empty);
-                        lastHeartbeat = DateTime.Now;
-                    } else  {
-                        NeedReload?.Invoke(this, EventArgs.Empty);
+                        LastHeartbeat = DateTime.Now;
+                    } else {
+                        if (ReloadAttempts == 0) {
+                            NeedReload?.Invoke(this, EventArgs.Empty);
+                            ReloadAttempts++;
+                        } else {
+                            ReloadAttempts++;
+                            if (ReloadAttempts == 10) {
+                                ReloadAttempts = 0;
+                            }
+                        }
                     }
                 }
             }
         }
 
         public void DoHeartbeat() {
-            lock (locker) {
-                lastHeartbeat = DateTime.Now;
-            }            
+            LastHeartbeat = DateTime.Now;
         }
 
         /// <summary>
@@ -62,12 +68,37 @@ namespace WatchdogBrowser.Workers {
         /// </summary>
         public int SwitchMirrorTimeout { get; set; }
 
+        object raLocker = new object();//блокировщик попыток перезагрузки
+        object locker = new object();//блокировщик доступа к последнему heartbeat
 
-
+        int reloadAttempts = 0;
         DateTime lastHeartbeat;
         DateTime currentTime;
-
         Timer timer;
+
+
+        int ReloadAttempts {
+            get {
+                return reloadAttempts;
+            }
+            set {
+                lock (raLocker) {
+                    reloadAttempts = value;
+                }
+            }
+        }
+
+        DateTime LastHeartbeat {
+            get {
+                return lastHeartbeat;
+            }
+            set {
+                lock (locker) {
+                    lastHeartbeat = value;
+                }
+                ReloadAttempts = 0;
+            }
+        }
 
         public event EventHandler NeedReload;
         public event EventHandler NeedChangeMirror;

@@ -5,8 +5,6 @@ using GalaSoft.MvvmLight.CommandWpf;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
@@ -17,13 +15,17 @@ using WatchdogBrowser.Handlers;
 using WatchdogBrowser.JSBoundObjects;
 using WatchdogBrowser.Workers;
 
-namespace WatchdogBrowser.Models {
-    public class TabItemModel : ObservableObject {
-        public TabItemModel() {
+namespace WatchdogBrowser.ViewModel {
+    public class TabItemViewModel : ObservableObject {
+        public TabItemViewModel() {
             CloseTabCommand = new RelayCommand(CloseMethod);
             ShowDevtoolsCommand = new RelayCommand(ShowDevtoolsMethod);
             SwitchMirrorCommand = new RelayCommand(SwitchMirrorMethod);
         }
+
+        static readonly SolidColorBrush greenBrush = new SolidColorBrush(Colors.Green);
+        static readonly SolidColorBrush redBrush = new SolidColorBrush(Colors.Red);
+        static readonly SolidColorBrush blackBrush = new SolidColorBrush(Colors.Black);
 
 
         public event EventHandler<StringMessageEventArgs> Close;
@@ -85,33 +87,7 @@ namespace WatchdogBrowser.Models {
             }
         }
 
-        private void StartPageLoadTimer() {
-            lock (locker) {
-                if (Watched && !pageLoadTimerActive) {
-                    pageLoadTimerActive = true;
-                    pageLoadFinished = false;
-                    var timer = new Timer();
-                    timer.Interval = PageLoadTimeout > 0 ? PageLoadTimeout * 1000 : 20000;
-                    timer.AutoReset = false;
-                    timer.Elapsed += Timer_Elapsed;
-                    timer.Start();
-                }
-            }
-        }
-
-        bool pageLoadTimerActive = false;
-        private void Timer_Elapsed(object sender, ElapsedEventArgs e) {
-            lock (locker) {
-                Application.Current.Dispatcher.Invoke(() => {
-                    if (!pageLoadFinished) {
-                        SwitchMirror();
-                    }
-                });
-                (sender as Timer).Stop();
-                pageLoadTimerActive = false;
-                (sender as Timer).Dispose();
-            }
-        }
+        
 
         /// <summary>
         /// Список зеркал сайта
@@ -147,9 +123,7 @@ namespace WatchdogBrowser.Models {
             }
         }
 
-        static readonly SolidColorBrush greenBrush = new SolidColorBrush(Colors.Green);
-        static readonly SolidColorBrush redBrush = new SolidColorBrush(Colors.Red);
-        static readonly SolidColorBrush blackBrush = new SolidColorBrush(Colors.Black);
+        
         /// <summary>
         /// Цвет индикатора статуса, только дял интерфейса
         /// </summary>
@@ -164,7 +138,7 @@ namespace WatchdogBrowser.Models {
 
         public string ErrorTime {
             get; private set;
-        } = string.Empty;  
+        } = string.Empty;
 
 
         public Visibility SwitchMirrorVisibility {
@@ -205,12 +179,13 @@ namespace WatchdogBrowser.Models {
                 return loadErrorVisible;
             }
             set {
-                Set<bool>(nameof(LoadErrorVisible), ref loadErrorVisible, value);
-                ShowErrorMessage();
+                loadErrorVisible = value;
+                RaisePropertyChanged(nameof(LoadErrorVisible));
+                FillErrorMessage();
             }
         }
 
-        
+
 
         /// <summary>
         /// Видно ли сообщение об ошибке загрузки, только для интерфейса
@@ -291,7 +266,7 @@ namespace WatchdogBrowser.Models {
                     jsBinding.Heartbeat += JsBinding_Heartbeat;
                     jsBinding.AlarmStateUpdated += JsBinding_AlarmStateUpdated;
                 }
-                jsBinding.CloseTab += JsBinding_CloseTab;                
+                jsBinding.CloseTab += JsBinding_CloseTab;
             }
             get {
                 return jsBinding;
@@ -314,7 +289,7 @@ namespace WatchdogBrowser.Models {
             } catch { }
         }
 
-        bool firstbeat = true;
+       
         //Обработчик сообщения о том, что страница жива, если сообщения нет, то нужно принять меры
         private void JsBinding_Heartbeat(object sender, EventArgs e) {
             Debug.WriteLine("HEARTBEAT");
@@ -322,15 +297,7 @@ namespace WatchdogBrowser.Models {
                 pageLoadFinished = true;
             }
 
-            if (firstbeat) {
-                watchdog.HeartbeatTimeout = HeartbeatTimeout;
-                watchdog.SwitchMirrorTimeout = SwitchMirrorTimeout;
-                watchdog.NeedChangeMirror += Watchdog_NeedChangeMirror;
-                watchdog.NeedReload += Watchdog_NeedReload;
-                watchdog.StartWatch();
-                firstbeat = false;
-            }
-
+            PokeWatchdog();
             watchdog?.DoHeartbeat();
 
             try {
@@ -343,6 +310,8 @@ namespace WatchdogBrowser.Models {
             } catch { }
         }
 
+        
+
         IWpfWebBrowser browser = null;
         public IWpfWebBrowser WebBrowser {
             get { return browser; }
@@ -351,11 +320,9 @@ namespace WatchdogBrowser.Models {
                 if (browser != null) {
 
                     browser.LoadError += Browser_LoadError;
-                    browser.FrameLoadStart += Browser_FrameLoadStart;//начало загрузки
+                    //browser.FrameLoadStart += Browser_FrameLoadStart;//начало загрузки
                     browser.FrameLoadEnd += Browser_FrameLoadEnd;//конец загрузки
-                    browser.LoadingStateChanged += Browser_LoadingStateChanged;
-
-
+                    //browser.LoadingStateChanged += Browser_LoadingStateChanged;
 
                     browser.MenuHandler = new WatchdogMenuHandler();
                     var lHandler = new WatchdogLifespanHandler();
@@ -367,26 +334,26 @@ namespace WatchdogBrowser.Models {
             }
         }
 
-        //Обработчик события состояния загрузки документа, не используется, нет смысла
-        private void Browser_LoadingStateChanged(object sender, LoadingStateChangedEventArgs e) {
-            //
-        }
-
-        //Обработчик события начала загрузки, не используется из-за бага в CEF
-        private void Browser_FrameLoadStart(object sender, FrameLoadStartEventArgs e) {
-            //
-        }
 
 
         //Обработчик события конца загрузки документа
         private void Browser_FrameLoadEnd(object sender, FrameLoadEndEventArgs e) {
-            lock (locker) {
-                pageLoadFinished = true;
+            var url = e.Url;
+            if (url != "data:text/html,chromewebdata") {
+                lock (locker) {
+                    pageLoadFinished = true;
+                }
             }
             try {
                 Application.Current.Dispatcher.Invoke(() => {
                     if (ReloadingMessageVisible) {
                         ReloadingMessageVisible = false;
+                    }
+                    if (url.ToLower().Contains("login")) {
+                        LoadErrorVisible = false;
+                    }
+                    if (pageLoadFinished) {
+                        PokeWatchdog();
                     }
                 });
             } catch { }
@@ -397,6 +364,15 @@ namespace WatchdogBrowser.Models {
         private void Watchdog_NeedReload(object sender, EventArgs e) {
             Application.Current.Dispatcher.Invoke(() => {
                 //Debug.WriteLine("Need reload");
+                try {
+                    if (browser.Address.ToLower().Contains("login")) {
+                        PlayErrorSound();
+                    } else {
+                        LoadErrorVisible = true;//показываем страшное сообщение об ошибке
+                    }
+                } catch {
+                    LoadErrorVisible = true;//показываем страшное сообщение об ошибке
+                }
                 ReloadBrowser();
             });
         }
@@ -429,8 +405,9 @@ namespace WatchdogBrowser.Models {
         /// <param name="browser">ссылка на компонент браузера</param>
         private void HandleLoadError(IWpfWebBrowser browser) {
             var tsk = Task.Run(async () => {
-                await Task.Delay(3000);//задержка перезагрузки, чтобы снизить нагрузку на систему, реально можно BSOD поймать
+                LoadErrorVisible = true;//показываем страшное сообщение об ошибке              
                 ReloadBrowser();
+                await Task.Delay(3000);//задержка перезагрузки, чтобы снизить нагрузку на систему, реально можно BSOD поймать
             });
         }
 
@@ -444,19 +421,53 @@ namespace WatchdogBrowser.Models {
 
         #endregion
 
-        public void DisposeTab() {
-            jsBinding.Heartbeat -= JsBinding_Heartbeat;
-            jsBinding.CloseTab -= JsBinding_CloseTab;
-            jsBinding.AlarmStateUpdated -= JsBinding_AlarmStateUpdated;
-            ZIndex = 0;
-            var tsk = Task.Run(async () => {
-                await Task.Delay(3000);//задержка уничтожения, чтобы не подвисало при закрытии вкладки
-                WebBrowser?.Dispose();
-            });
+        bool firstbeat = true;
+        private void PokeWatchdog() {
+            if (Watched && firstbeat) {
+                watchdog.HeartbeatTimeout = HeartbeatTimeout;
+                watchdog.SwitchMirrorTimeout = SwitchMirrorTimeout;
+                watchdog.NeedChangeMirror += Watchdog_NeedChangeMirror;
+                watchdog.NeedReload += Watchdog_NeedReload;
+                watchdog.StartWatch();
+                firstbeat = false;
+            }            
+        }
+
+        
+
+        private void StartPageLoadTimer() {
+            lock (locker) {
+                if (Watched && !pageLoadTimerActive) {
+                    pageLoadTimerActive = true;
+                    pageLoadFinished = false;
+                    var timer = new Timer();
+                    timer.Interval = PageLoadTimeout > 0 ? PageLoadTimeout * 1000 : 20000;
+                    timer.AutoReset = false;
+                    timer.Elapsed += PageLoadTimer_Elapsed;
+                    timer.Start();
+                }
+            }
+        }
+
+        bool pageLoadTimerActive = false;
+        private void PageLoadTimer_Elapsed(object sender, ElapsedEventArgs e) {
+            bool switchMirror = false;
+            lock (locker) {
+                switchMirror = !pageLoadFinished;
+            }
+            if (switchMirror) {
+                Application.Current.Dispatcher.Invoke(() => {
+                    SwitchMirror();
+                });
+            }
+            (sender as Timer).Stop();
+            pageLoadTimerActive = false;
+            (sender as Timer).Dispose();
+
         }
 
         private void ReloadBrowser() {
-            LoadErrorVisible = true;//показываем страшное сообщение об ошибке
+            //LoadErrorVisible = true;//показываем страшное сообщение об ошибке
             browser?.Reload();//перезагружаем страницу
 
         }
@@ -473,8 +484,8 @@ namespace WatchdogBrowser.Models {
 
 
         bool isErrorShown = false;
-        private void ShowErrorMessage() {
-            if (loadErrorVisible) { 
+        private void FillErrorMessage() {
+            if (loadErrorVisible) {
                 var t = DateTime.Now;
                 ErrorTime = ErrorTime == string.Empty ? t.ToString("HH:mm:ss") : ErrorTime;
                 if (!isErrorShown) {
@@ -512,5 +523,16 @@ namespace WatchdogBrowser.Models {
             });
         }
 
-    }
-}
+        public void DisposeTab() {
+            jsBinding.Heartbeat -= JsBinding_Heartbeat;
+            jsBinding.CloseTab -= JsBinding_CloseTab;
+            jsBinding.AlarmStateUpdated -= JsBinding_AlarmStateUpdated;
+            ZIndex = 0;
+            var tsk = Task.Run(async () => {
+                await Task.Delay(3000);//задержка уничтожения, чтобы не подвисало при закрытии вкладки
+                WebBrowser?.Dispose();
+            });
+        }
+
+    }//end class
+}//end namespace

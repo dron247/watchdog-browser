@@ -152,7 +152,7 @@
     <Compile Include="Handlers\WatchdogMenuHandler.cs" />
     <Compile Include="JSBoundObjects\MonitorJSBound.cs" />
     <Compile Include="Models\SiteModel.cs" />
-    <Compile Include="Models\TabItemModel.cs" />
+    <Compile Include="ViewModel\TabItemViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\ViewModelLocator.cs" />
     <Compile Include="Workers\Watchdog.cs" />
