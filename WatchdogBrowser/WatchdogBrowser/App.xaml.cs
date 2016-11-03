@@ -44,6 +44,7 @@ namespace WatchdogBrowser {
             settings.PersistSessionCookies = true;
             settings.PersistUserPreferences = true;
             settings.WindowlessRenderingEnabled = true;
+            settings.LogSeverity = LogSeverity.Disable;
 
             if (!Cef.Initialize(settings, performDependencyCheck: true, browserProcessHandler: new BrowserProcessHandler())) {
                 throw new Exception("Unable to Initialize Cef");
