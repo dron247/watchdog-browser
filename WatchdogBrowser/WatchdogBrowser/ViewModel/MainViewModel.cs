@@ -101,6 +101,7 @@ namespace WatchdogBrowser.ViewModel {
                 prepTab.HeartbeatTimeout = site.HeartbeatTimeout;
                 prepTab.PageLoadTimeout = site.LoadPageTimeout;
                 prepTab.SwitchMirrorTimeout = site.SwitchMirrorTimeout;
+                prepTab.AlertDelayTime = site.AlertDelayTime;
                 prepTab.Close += TabClosed;
                 prepTab.NewTabRequest += Tab_NewTabRequest;
                 lock (locker) {

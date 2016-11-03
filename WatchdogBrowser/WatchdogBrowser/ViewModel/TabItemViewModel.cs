@@ -212,10 +212,25 @@ namespace WatchdogBrowser.ViewModel {
         /// </summary>
         public int SwitchMirrorTimeout { get; set; }
 
+        /// <summary>
+        /// Время задержки звукового сигналя после появления сообщения об ошибке
+        /// </summary>
+        public int AlertDelayTime { get; set; } = 0;
+
+        /// <summary>
+        /// Дополнительное сообщение от администратора, которое будет выведено в окне ошибки
+        /// </summary>
         public string ErrorMessage { get; set; }
 
+        /// <summary>
+        /// Путь к звуковому файлу для предупреждения
+        /// </summary>
         public string WarningSoundPath { get; set; } = string.Empty;
 
+
+        /// <summary>
+        /// Путь к звуковому файлу для ошибки
+        /// </summary>
         public string ErrorSoundPath { get; set; } = string.Empty;
 
 
@@ -259,6 +274,9 @@ namespace WatchdogBrowser.ViewModel {
         #region BROWSER
 
         private MonitorJSBound jsBinding = null;
+        /// <summary>
+        /// Свойство для привязки js примеси браузера, задаётся в BrowserTabContent.xaml.cs
+        /// </summary>
         public MonitorJSBound JsBinding {
             set {
                 jsBinding = value;
@@ -313,6 +331,9 @@ namespace WatchdogBrowser.ViewModel {
         
 
         IWpfWebBrowser browser = null;
+        /// <summary>
+        /// Свойство для привязки компонента веб-браузера к модели, привязка в BrowserTabContent.xaml
+        /// </summary>
         public IWpfWebBrowser WebBrowser {
             get { return browser; }
             set {
@@ -361,6 +382,20 @@ namespace WatchdogBrowser.ViewModel {
             RaisePropertyChanged("SelectedTab.CurrentUrl");
         }
 
+        //Обработчик события ошибки загрузки документа
+        private void Browser_LoadError(object sender, CefSharp.LoadErrorEventArgs e) {
+            //MessageBox.Show($"Ошибка загрузки страницыю код: {e.ErrorCode}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            if (e.ErrorCode == CefErrorCode.Aborted) return;
+            try {
+                Application.Current.Dispatcher.Invoke(() => {
+                    HandleLoadError((IWpfWebBrowser)sender);
+                });
+            } catch { }
+
+            // Debug.WriteLine($"Перезагрузка после {e.ErrorCode}; РЕАЛИЗУЙ УМНУЮ ПЕРЕЗАГРУЗКУ", "LOAD LIFECYCLE");
+        }
+
+        //Обработчик события "требуется перезагрузка страницы" от следящего таймера
         private void Watchdog_NeedReload(object sender, EventArgs e) {
             Application.Current.Dispatcher.Invoke(() => {
                 //Debug.WriteLine("Need reload");
@@ -378,7 +413,7 @@ namespace WatchdogBrowser.ViewModel {
         }
 
 
-
+        //Обработчик события "требуется смена зеркала" от следящего таймера
         private void Watchdog_NeedChangeMirror(object sender, EventArgs e) {
             Application.Current.Dispatcher.Invoke(() => {
                 //Debug.WriteLine("Need mirror change");
@@ -386,18 +421,19 @@ namespace WatchdogBrowser.ViewModel {
             });
         }
 
-        //Обработчик события ошибки загрузки документа
-        private void Browser_LoadError(object sender, CefSharp.LoadErrorEventArgs e) {
-            //MessageBox.Show($"Ошибка загрузки страницыю код: {e.ErrorCode}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            if (e.ErrorCode == CefErrorCode.Aborted) return;
-            try {
-                Application.Current.Dispatcher.Invoke(() => {
-                    HandleLoadError((IWpfWebBrowser)sender);
-                });
-            } catch { }
 
-            // Debug.WriteLine($"Перезагрузка после {e.ErrorCode}; РЕАЛИЗУЙ УМНУЮ ПЕРЕЗАГРУЗКУ", "LOAD LIFECYCLE");
-        }
+
+
+
+
+
+
+
+
+
+
+
+        #endregion
 
         /// <summary>
         /// Метод обработки ошибки страницы
@@ -410,16 +446,6 @@ namespace WatchdogBrowser.ViewModel {
                 await Task.Delay(3000);//задержка перезагрузки, чтобы снизить нагрузку на систему, реально можно BSOD поймать
             });
         }
-
-
-
-
-
-
-
-
-
-        #endregion
 
         bool firstbeat = true;
         private void PokeWatchdog() {
@@ -434,7 +460,9 @@ namespace WatchdogBrowser.ViewModel {
         }
 
         
-
+        /// <summary>
+        /// Метод запуска таймера для отслеживания настраиваемого таймаута страницы
+        /// </summary>
         private void StartPageLoadTimer() {
             lock (locker) {
                 if (Watched && !pageLoadTimerActive) {
@@ -500,14 +528,20 @@ namespace WatchdogBrowser.ViewModel {
             RaisePropertyChanged(nameof(LoadErrorVisibility));
         }
 
+        bool isAlertInSchedule = false;
         private void PlayErrorSound() {
+            if (isAlertInSchedule) return;
             var tsk = Task.Run(async () => {
-                if (ErrorSoundPath != string.Empty) {
-                    var player = new System.Media.SoundPlayer(ErrorSoundPath);
-                    player.Play();
-                    player.Dispose();
-                }
-                await Task.Delay(1);//задержка повтора
+                isAlertInSchedule = true;
+                await Task.Delay(AlertDelayTime * 1000);//задержка воспроизведения звука ошибки
+                if (LoadErrorVisible) {
+                    if (ErrorSoundPath != string.Empty) {
+                        var player = new System.Media.SoundPlayer(ErrorSoundPath);
+                        player.Play();
+                        isAlertInSchedule = false;
+                        player.Dispose();
+                    }
+                }              
             });
         }
 

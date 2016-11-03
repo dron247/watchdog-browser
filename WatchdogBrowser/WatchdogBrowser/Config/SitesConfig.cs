@@ -66,6 +66,7 @@ namespace WatchdogBrowser.Config {
                     HeartbeatTimeout = 0,
                     SwitchMirrorTimeout = 0,
                     LoadPageTimeout = 0,
+                    AlertDelayTime = 0,
                     Username = string.Empty,
                     Password = string.Empty,
                     Watched = false,
@@ -87,7 +88,7 @@ namespace WatchdogBrowser.Config {
                     //берём только первый элемент, по ТЗ он один, но такой код даёт задел на доработку
                     var xSite = xSites.Elements().First();
                     var siteName = string.Empty;
-                    int intervalHeartbeat = 10, intervalMirror = 60, intervalPageLoad = 20;
+                    int intervalHeartbeat = 10, intervalMirror = 60, intervalPageLoad = 20, alertDelayTime = 0;
                     string username = string.Empty, password = string.Empty, message = string.Empty, warningSoundPath = string.Empty, errorSoundPath = string.Empty;
                     bool watched = false;
                     List<string> mirrors = new List<string>();
@@ -127,6 +128,15 @@ namespace WatchdogBrowser.Config {
                                 intervalPageLoad = int.Parse(attr.Value);
                             } catch {
                                 intervalPageLoad = 20;
+                            }
+                            continue;
+                        }
+
+                        if (attr.Name == "alertDelayTime") {
+                            try {
+                                alertDelayTime = int.Parse(attr.Value);
+                            } catch {
+                                alertDelayTime = 0;
                             }
                             continue;
                         }
@@ -175,7 +185,7 @@ namespace WatchdogBrowser.Config {
                             }
                             continue;
                         }
-                        
+
                         if (attr.Name == "errorSoundPath") {
                             try {
                                 errorSoundPath = attr.Value;
@@ -219,6 +229,7 @@ namespace WatchdogBrowser.Config {
                         HeartbeatTimeout = intervalHeartbeat,
                         SwitchMirrorTimeout = intervalMirror,
                         LoadPageTimeout = intervalPageLoad,
+                        AlertDelayTime =alertDelayTime,
                         Username = username,
                         Password = password,
                         Watched = watched,
@@ -243,20 +254,24 @@ namespace WatchdogBrowser.Config {
     }
 
 }
-/*
- * Пример xml
- * <?xml version="1.1" encoding="UTF-8" ?>
- * <sites>
- *  <site name="Кобра Гарант" updateOk="10" updateFail="60" updateTimeout="20">
- *      <mirrors>
- *          <mirror domain="ex1.example.com" protocol="https"/>
- *          <mirror domain="ex2.example.com" protocol="https"/>
- *      </mirrors>
- *      <whitelist>
- *          <path uri="index.php?r=site%2Findex"/>
- *          <path uri="index.php"/>
- *          <path uri="index.php?r=site%2Fobject-list"/>
- *      </whitelist>
- *  </site>
- * </sites>
- */
+//Пример файла настроек
+//<? xml version="1.0" encoding="UTF-8" ?>
+//<sites>
+//   <site
+//     name = "Кобра Гарант"
+//     intervalHeartbeat="12"      
+//     intervalMirror="30" 
+//     intervalPageLoad="20"
+//     alertDelayTime="30"
+//     username="usrname" 
+//     password="pwd" 
+//     watched="true" 
+//     message="Если подключение не восстановилось за десять минут, позвоните родителям"
+//     warningSoundPath="Sounds\alert_in_browser.wav"
+//     errorSoundPath="Sounds\alert_in_browser.wav">
+//       <mirrors>
+//           <mirror domain = "online.mirror.ru" protocol="https"/>
+//		   <mirror domain = "1online.mirror.ru" protocol="https"/>
+//       </mirrors>
+//   </site>
+//</sites>

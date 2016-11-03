@@ -10,6 +10,7 @@ namespace WatchdogBrowser.Models {
         public int HeartbeatTimeout { get; set; }
         public int SwitchMirrorTimeout { get; set; }
         public int LoadPageTimeout { get; set; }
+        public int AlertDelayTime { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
         public bool Watched { get; set; }
