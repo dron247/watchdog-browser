@@ -24,7 +24,7 @@ This application based on CEFSharp. Made on C# + WPF. It is a special browser an
 ## JavaScript интерфейс
 Для управления браузером доступен яваскрипт интерфейс. Если веб ресурс открыт в браузере, ему доступен объект cobraMonitor, у которого есть несколько методов.
 
-'''javascript
+    '''javascript
 
     var username = cobraMonitor.getUsername();//Возвращает имя пользователя из файла настроек браузера
     var password = cobraMonitor.getPassword();//Возвращает пароль пользователя из файла настроек браузера
@@ -34,6 +34,6 @@ This application based on CEFSharp. Made on C# + WPF. It is a special browser an
 
     cobraMonitor.heartbeat(); /*необходимо вызывать в пределах определённого в настройках интервала времени, если включено отслеживание, если не вызвать, то будет выведена ошибка, а браузер будет пытаться перезагрузить страницу, или переключить зеркало*/
 
-'''
+    '''
 
 ## Файл настроек
