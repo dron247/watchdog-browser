@@ -1,8 +1,13 @@
 # watchdog-browser
-This application based on CEFSharp. Made on C# + WPF. It is a special browser and it's only purpose is to be reliable. This application made for one single fire station, so, all the documentation, comments, resources are in russian.
+This application based on CEFSharp. Made on C# + WPF. It is a special browser and it's only purpose is to be reliable. This application made for one certain organization, so, all the documentation, comments, resources are in russian. Can be used as real life example of using CEFSharp.wpf with MVVM pattern. Solved wpf TabControl reloading trouble.
 
 
-# Надёжный браузер
+# Браузер Кобра Гарант - мониторинг
+Приложение разработано для организации Кобра Гарант. Представляет веб-браузер на основе компонента CEFSharp.wpf с поддержкой вкладок и отслеживания состояния веб-ресурса.
+
+Выбор CEFSharp обоснован тем, что он поддерживает 2way ssl
+
+
 ## Сборка:
 1. Установите [Visual Studio 2015](https://www.visualstudio.com/ru/vs/community/)
 2. Клонируйте репозиторий, или скачайте в виде ZIP архива.
@@ -10,8 +15,23 @@ This application based on CEFSharp. Made on C# + WPF. It is a special browser an
 4. Щелкните правой кнопкой по списку зависимостей, откройте менеджер NuGet и согласитесь восстановить пакеты
 5. Нажмите F5
 
-## Тут будет: 
-+ описание принципов работы
-+ документация
-+ рекомендации по развёртыванию
-+ рекомендации по настройке
+## Использование: 
++ Соберите приложение из исходных кодов.
++ Добавьте, если нужно, звуки предупреждения и ошибки, желательно в формате pcm wav, можно попробовать другие, поддержка не гарантирована
++ Если необходима поддержка отслеживания состояния веб ресурса, реализуйте js интерфейс, описан ниже.
++ Создайте файл настроек, по умолчанию он должен называться config.xml и лежать в папке с исполняемым файлом, путь и название можно изменить в файле WatchDogBrowser.exe.config, или в окне настроек приложения в Visual Studio
+
+## JavaScript интерфейс
+Для управления браузером доступен яваскрипт интерфейс. Если веб ресурс открыт в браузере, ему доступен объект cobraMonitor, у которого есть несколько методов.
+
+'''javascript
+var username = cobraMonitor.getUsername();//Возвращает имя пользователя из файла настроек браузера
+var password = cobraMonitor.getPassword();//Возвращает пароль пользователя из файла настроек браузера
+
+cobraMonitor.closeTab(url);//Отдаёт команду браузеру на закрытие вкладки
+cobraMonitor.setAlarm(integer);//-1,0 или 1, другие значения принимаются равными единице, меняет цвет заголовка вкладки -1 - черный, 0 - зелёный, 1 - красный
+
+cobraMonitor.heartbeat(); /*необходимо вызывать в пределах определённого в настройках интервала времени, если включено отслеживание, если не вызвать, то будет выведена ошибка, а браузер будет пытаться перезагрузить страницу, или переключить зеркало*/
+'''
+
+## Файл настроек
