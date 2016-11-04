@@ -482,14 +482,14 @@ namespace WatchdogBrowser.ViewModel {
             bool switchMirror = false;
             lock (locker) {
                 switchMirror = !pageLoadFinished;
+                pageLoadTimerActive = false;
             }
             if (switchMirror) {
                 Application.Current.Dispatcher.Invoke(() => {
                     SwitchMirror();
                 });
             }
-            (sender as Timer).Stop();
-            pageLoadTimerActive = false;
+            (sender as Timer).Stop();            
             (sender as Timer).Dispose();
 
         }
