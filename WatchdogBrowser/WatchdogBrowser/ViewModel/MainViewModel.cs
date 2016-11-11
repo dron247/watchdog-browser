@@ -1,8 +1,10 @@
 using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.CommandWpf;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows;
+using System.Windows.Input;
 using WatchdogBrowser.Config;
 using WatchdogBrowser.CustomEventArgs;
 
@@ -39,6 +41,8 @@ namespace WatchdogBrowser.ViewModel {
             } catch (Exception e) {
                 MessageBox.Show($"Œ¯Ë·Í‡ ˜ÚÂÌËˇ Ù‡ÈÎ‡ ÍÓÌÙË„Û‡ˆËË {e.Message}", "Œ¯Ë·Í‡", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+
+            ShowStatusBarCommand = new RelayCommand(ToggleStatusBarVisibility);
         }
 
         #region —¬Œ…—“¬¿ œ–»¬ﬂ« »
@@ -94,7 +98,7 @@ namespace WatchdogBrowser.ViewModel {
                 prepTab.Watched = site.Watched;
                 prepTab.Url = site.Mirrors[0];
                 prepTab.Mirrors = site.Mirrors;
-                prepTab.Closeable = !site.Watched;                
+                prepTab.Closeable = !site.Watched;
                 prepTab.ErrorMessage = site.Message;
                 prepTab.WarningSoundPath = site.WarningSoundPath;
                 prepTab.ErrorSoundPath = site.ErrorSoundPath;
@@ -112,7 +116,7 @@ namespace WatchdogBrowser.ViewModel {
             SelectedTab = Tabs[0];
         }
 
-        
+
 
         private void Tab_NewTabRequest(object sender, CustomEventArgs.TabRequestEventArgs e) {
             Application.Current.Dispatcher.Invoke(() => {
@@ -120,7 +124,7 @@ namespace WatchdogBrowser.ViewModel {
                     Title = "",
                     Watched = false,
                     Url = e.URL,
-                    Closeable = true                    
+                    Closeable = true
                 };
                 tab.Close += TabClosed;
                 tab.NewTabRequest += Tab_NewTabRequest;
@@ -131,14 +135,14 @@ namespace WatchdogBrowser.ViewModel {
                 SelectedTab = tab;
             });
         }
-        
+
 
         private void TabClosed(object sender, StringMessageEventArgs e) {
             //find tab
             if (e.Message != string.Empty) {
                 TabItemViewModel tab = null;
                 lock (locker) {
-                    foreach(var t in Tabs) {
+                    foreach (var t in Tabs) {
                         if (t.Url.Contains(e.Message)) {
                             tab = t;
                             break;
@@ -174,6 +178,20 @@ namespace WatchdogBrowser.ViewModel {
             }
         }
 
+        #endregion
+
+        public Visibility StausBarVisibility { get; set; } = Visibility.Collapsed;
+
+        #region  ŒÃÃ¿Õƒ€
+        public ICommand ShowStatusBarCommand { get; set; }
+        void ToggleStatusBarVisibility() {
+            if (StausBarVisibility == Visibility.Collapsed) {
+                StausBarVisibility = Visibility.Visible;
+            } else {
+                StausBarVisibility = Visibility.Collapsed;
+            }
+            RaisePropertyChanged(nameof(StausBarVisibility));
+        }
         #endregion
     }
 }
