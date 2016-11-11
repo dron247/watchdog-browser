@@ -22,6 +22,7 @@ namespace WatchdogBrowser.ViewModel {
     /// </para>
     /// </summary>
     public class MainViewModel : ViewModelBase {
+        private const string WindowTitleBase = "Кобра Гарант - мониторинг";
 
         SitesConfig config = new SitesConfig();
         object locker = new object();
@@ -108,6 +109,7 @@ namespace WatchdogBrowser.ViewModel {
                 prepTab.AlertDelayTime = site.AlertDelayTime;
                 prepTab.Close += TabClosed;
                 prepTab.NewTabRequest += Tab_NewTabRequest;
+                prepTab.UrlChanged += PrepTab_MirrorChanged;
                 lock (locker) {
                     Tabs.Add(prepTab);
                 }
@@ -116,7 +118,16 @@ namespace WatchdogBrowser.ViewModel {
             SelectedTab = Tabs[0];
         }
 
-
+        private void PrepTab_MirrorChanged(object sender, StringMessageEventArgs e) {
+            try {
+                var elements1 = e.Message.Split('.');
+                var ttl = elements1[0].Replace("/", string.Empty).Split(':')[1];
+                WindowTitle = $"{WindowTitleBase} ({ttl})";
+            } catch {
+                WindowTitle = WindowTitleBase;
+            }
+            RaisePropertyChanged(nameof(WindowTitle));
+        }
 
         private void Tab_NewTabRequest(object sender, CustomEventArgs.TabRequestEventArgs e) {
             Application.Current.Dispatcher.Invoke(() => {
@@ -181,6 +192,7 @@ namespace WatchdogBrowser.ViewModel {
         #endregion
 
         public Visibility StausBarVisibility { get; set; } = Visibility.Collapsed;
+        public string WindowTitle { get; set; } = WindowTitleBase;
 
         #region КОММАНДЫ
         public ICommand ShowStatusBarCommand { get; set; }

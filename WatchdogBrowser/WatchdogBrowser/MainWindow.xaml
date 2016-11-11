@@ -9,7 +9,7 @@
         xmlns:controls="clr-namespace:WatchdogBrowser.Controls"
         x:Class="WatchdogBrowser.MainWindow"
         mc:Ignorable="d"
-        Title="Кобра Гарант - мониторинг" MinHeight="350" MinWidth="525" Height="600" Width="800"
+        Title="{Binding WindowTitle}" MinHeight="350" MinWidth="525" Height="600" Width="800"
         WindowState="Maximized" Icon="favicon.ico"
         DataContext="{Binding Main, Source={StaticResource Locator}}"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"

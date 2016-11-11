@@ -30,6 +30,7 @@ namespace WatchdogBrowser.ViewModel {
 
         public event EventHandler<StringMessageEventArgs> Close;
         public event EventHandler<TabRequestEventArgs> NewTabRequest;
+        public event EventHandler<StringMessageEventArgs> UrlChanged;
         //public event EventHandler CloseTabRequest;
 
         Watchdog watchdog = new Watchdog();
@@ -87,7 +88,7 @@ namespace WatchdogBrowser.ViewModel {
             }
         }
 
-        
+
 
         /// <summary>
         /// Список зеркал сайта
@@ -123,7 +124,7 @@ namespace WatchdogBrowser.ViewModel {
             }
         }
 
-        
+
         /// <summary>
         /// Цвет индикатора статуса, только дял интерфейса
         /// </summary>
@@ -307,7 +308,7 @@ namespace WatchdogBrowser.ViewModel {
             } catch { }
         }
 
-       
+
         //Обработчик сообщения о том, что страница жива, если сообщения нет, то нужно принять меры
         private void JsBinding_Heartbeat(object sender, EventArgs e) {
             //Debug.WriteLine("HEARTBEAT");
@@ -328,7 +329,7 @@ namespace WatchdogBrowser.ViewModel {
             } catch { }
         }
 
-        
+
 
         IWpfWebBrowser browser = null;
         /// <summary>
@@ -380,6 +381,7 @@ namespace WatchdogBrowser.ViewModel {
             } catch { }
             RaisePropertyChanged(nameof(CurrentUrl));
             RaisePropertyChanged("SelectedTab.CurrentUrl");
+            UrlChanged?.Invoke(this, new StringMessageEventArgs { Message = Url });
         }
 
         //Обработчик события ошибки загрузки документа
@@ -456,10 +458,10 @@ namespace WatchdogBrowser.ViewModel {
                 watchdog.NeedReload += Watchdog_NeedReload;
                 watchdog.StartWatch();
                 firstbeat = false;
-            }            
+            }
         }
 
-        
+
         /// <summary>
         /// Метод запуска таймера для отслеживания настраиваемого таймаута страницы
         /// </summary>
@@ -489,7 +491,7 @@ namespace WatchdogBrowser.ViewModel {
                     SwitchMirror();
                 });
             }
-            (sender as Timer).Stop();            
+            (sender as Timer).Stop();
             (sender as Timer).Dispose();
 
         }
@@ -508,6 +510,7 @@ namespace WatchdogBrowser.ViewModel {
             }
             Url = Mirrors[activeMirror];
             PlayWarningSound();
+            UrlChanged?.Invoke(this, new StringMessageEventArgs { Message = Url });
         }
 
 
@@ -541,7 +544,7 @@ namespace WatchdogBrowser.ViewModel {
                         isAlertInSchedule = false;
                         player.Dispose();
                     }
-                }              
+                }
             });
         }
 
