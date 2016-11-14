@@ -85,3 +85,10 @@ This application based on CEFSharp. Made on C# + WPF. It is a special browser an
 **errorSoundPath="Sounds\alert_in_browser.wav"** - путь к файлу со звуком ошибки, воспроизводится при появлении окна ошибки
 
 
+## Отладочные сочетания клавиш
+
+**Ctrl + Shift + I** - открыть отладчик Chromium, страница должна быть в фокусе
+
+**Ctrl + Alt + I** - показать текущий адрес страницы в строке состояния(нижний правый угол окна)
+
+
