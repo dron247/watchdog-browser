@@ -1,3 +1,5 @@
+(made within two weeks, some rework needed, consider this as an example of extremely fast development and solving the problems, while feet are burning)
+
 # watchdog-browser
 This application based on CEFSharp. Made on C# + WPF. It is a special browser and it's only purpose is to be reliable. This application made for one certain organization, so, all the documentation, comments, resources are in russian. Can be used as real life example of using CEFSharp.wpf with MVVM pattern. Solved wpf TabControl reloading trouble.
 
